@@ -18,7 +18,7 @@ function renderProducts(products = globalThis.products) {
   if (products.length === 0) {
     const emptyMessage = document.createElement("p");
     emptyMessage.className = "no-products-message";
-    emptyMessage.textContent = "Aramanıza uygun ürün bulunamadı.";
+    emptyMessage.textContent = "Ürün bulunamadı";
     productList.append(emptyMessage);
     return;
   }
