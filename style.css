@@ -11,7 +11,7 @@ body {
 
 header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  grid-template-columns: minmax(180px, 2fr) minmax(160px, 1fr) minmax(200px, 1.4fr);
   gap: 0.85rem;
   padding: 1.25rem clamp(1rem, 4vw, 3rem);
   background: #20734a;
@@ -27,7 +27,8 @@ header h1 {
 }
 
 #search-input,
-#category-select {
+#category-select,
+#sort-select {
   width: 100%;
   min-height: 2.85rem;
   padding: 0.65rem 0.9rem;
@@ -44,12 +45,14 @@ header h1 {
   color: #7b887e;
 }
 
-#category-select {
+#category-select,
+#sort-select {
   cursor: pointer;
 }
 
 #search-input:focus,
-#category-select:focus {
+#category-select:focus,
+#sort-select:focus {
   border-color: #9ed7b5;
   outline: none;
   box-shadow: 0 0 0 3px rgb(158 215 181 / 35%);
@@ -255,6 +258,45 @@ main {
 }
 
 .clear-cart-button:disabled {
+  color: #929b94;
+  cursor: not-allowed;
+}
+
+.order-success-message {
+  margin: 1rem 0 0;
+  color: #20734a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.checkout-button {
+  width: 100%;
+  margin-top: 0.65rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #20734a;
+  border-radius: 8px;
+  background: #20734a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.checkout-button:hover:not(:disabled) {
+  border-color: #185b39;
+  background: #185b39;
+  box-shadow: 0 4px 10px rgb(22 57 38 / 16%);
+}
+
+.checkout-button:focus-visible {
+  outline: 3px solid #9ed7b5;
+  outline-offset: 2px;
+}
+
+.checkout-button:disabled {
+  border-color: #d7e2d9;
+  background: #edf1ed;
   color: #929b94;
   cursor: not-allowed;
 }

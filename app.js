@@ -1,6 +1,7 @@
 const sepet = [];
 const CART_STORAGE_KEY = "mini-market-sepet";
 let toastTimeout;
+let orderSuccessMessage = "";
 
 function renderProducts(products = globalThis.products) {
   const productList = document.getElementById("product-list");
@@ -50,9 +51,10 @@ function renderProducts(products = globalThis.products) {
 function filterProducts() {
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
+  const sortSelect = document.getElementById("sort-select");
 
-  if (!searchInput || !categorySelect) {
-    throw new Error("Arama kutusu veya kategori filtresi bulunamadı.");
+  if (!searchInput || !categorySelect || !sortSelect) {
+    throw new Error("Arama, kategori veya sıralama seçimi bulunamadı.");
   }
 
   if (!Array.isArray(globalThis.products)) {
@@ -68,6 +70,12 @@ function filterProducts() {
 
     return matchesName && matchesCategory;
   });
+
+  if (sortSelect.value === "price-asc") {
+    filteredProducts.sort((a, b) => a.fiyat - b.fiyat);
+  } else if (sortSelect.value === "price-desc") {
+    filteredProducts.sort((a, b) => b.fiyat - a.fiyat);
+  }
 
   renderProducts(filteredProducts);
 }
@@ -199,6 +207,22 @@ function renderCart() {
   clearCartButton.disabled = sepet.length === 0;
   clearCartButton.addEventListener("click", clearCart);
   cartContent.append(clearCartButton);
+
+  if (orderSuccessMessage) {
+    const successMessage = document.createElement("p");
+    successMessage.className = "order-success-message";
+    successMessage.setAttribute("role", "status");
+    successMessage.textContent = orderSuccessMessage;
+    cartContent.append(successMessage);
+  }
+
+  const checkoutButton = document.createElement("button");
+  checkoutButton.type = "button";
+  checkoutButton.className = "checkout-button";
+  checkoutButton.textContent = "Siparişi Tamamla";
+  checkoutButton.disabled = sepet.length === 0;
+  checkoutButton.addEventListener("click", completeOrder);
+  cartContent.append(checkoutButton);
 }
 
 function saveCart() {
@@ -272,10 +296,22 @@ function clearCart() {
   renderCart();
 }
 
+function completeOrder() {
+  if (sepet.length === 0) {
+    return;
+  }
+
+  sepet.length = 0;
+  localStorage.removeItem(CART_STORAGE_KEY);
+  orderSuccessMessage = "Siparişiniz başarıyla alındı! Teşekkür ederiz.";
+  renderCart();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   loadCart();
   document.getElementById("search-input").addEventListener("input", filterProducts);
   document.getElementById("category-select").addEventListener("change", filterProducts);
+  document.getElementById("sort-select").addEventListener("change", filterProducts);
   filterProducts();
   renderCart();
 });
