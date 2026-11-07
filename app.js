@@ -1,20 +1,29 @@
 const sepet = [];
+const CART_STORAGE_KEY = "mini-market-sepet";
 let toastTimeout;
 
-function renderProducts() {
+function renderProducts(products = globalThis.products) {
   const productList = document.getElementById("product-list");
 
   if (!productList) {
     throw new Error("#product-list alanı bulunamadı.");
   }
 
-  if (!Array.isArray(globalThis.products)) {
+  if (!Array.isArray(products)) {
     throw new Error("Ürünler dizisi yüklenemedi.");
   }
 
   productList.replaceChildren();
 
-  globalThis.products.forEach((product) => {
+  if (products.length === 0) {
+    const emptyMessage = document.createElement("p");
+    emptyMessage.className = "no-products-message";
+    emptyMessage.textContent = "Aramanıza uygun ürün bulunamadı.";
+    productList.append(emptyMessage);
+    return;
+  }
+
+  products.forEach((product) => {
     const card = document.createElement("article");
     card.className = "product-card";
 
@@ -38,6 +47,31 @@ function renderProducts() {
   });
 }
 
+function filterProducts() {
+  const searchInput = document.getElementById("search-input");
+  const categorySelect = document.getElementById("category-select");
+
+  if (!searchInput || !categorySelect) {
+    throw new Error("Arama kutusu veya kategori filtresi bulunamadı.");
+  }
+
+  if (!Array.isArray(globalThis.products)) {
+    throw new Error("Ürünler dizisi yüklenemedi.");
+  }
+
+  const searchTerm = searchInput.value.trim().toLocaleLowerCase("tr-TR");
+  const selectedCategory = categorySelect.value;
+  const filteredProducts = globalThis.products.filter((product) => {
+    const matchesName = product.isim.toLocaleLowerCase("tr-TR").includes(searchTerm);
+    const matchesCategory =
+      selectedCategory === "Tümü" || product.kategori === selectedCategory;
+
+    return matchesName && matchesCategory;
+  });
+
+  renderProducts(filteredProducts);
+}
+
 function addToCart(product, showNotification = false) {
   const cartItem = sepet.find((item) => item.id === product.id);
 
@@ -47,6 +81,7 @@ function addToCart(product, showNotification = false) {
     sepet.push({ ...product, miktar: 1 });
   }
 
+  saveCart();
   renderCart();
 
   if (showNotification) {
@@ -166,6 +201,42 @@ function renderCart() {
   cartContent.append(clearCartButton);
 }
 
+function saveCart() {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(sepet));
+}
+
+function loadCart() {
+  const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+
+  if (savedCart === null) {
+    return;
+  }
+
+  let parsedCart;
+  try {
+    parsedCart = JSON.parse(savedCart);
+  } catch (error) {
+    throw new Error("Kaydedilmiş sepet verisi geçerli JSON değil.", { cause: error });
+  }
+
+  if (
+    !Array.isArray(parsedCart) ||
+    parsedCart.some((item) =>
+      !item ||
+      !Number.isInteger(item.id) ||
+      typeof item.isim !== "string" ||
+      typeof item.fiyat !== "number" ||
+      !Number.isFinite(item.fiyat) ||
+      !Number.isInteger(item.miktar) ||
+      item.miktar < 1
+    )
+  ) {
+    throw new Error("Kaydedilmiş sepet verisi beklenen biçimde değil.");
+  }
+
+  sepet.push(...parsedCart);
+}
+
 function decreaseCartItem(productId) {
   const itemIndex = sepet.findIndex((item) => item.id === productId);
 
@@ -179,6 +250,7 @@ function decreaseCartItem(productId) {
     sepet[itemIndex].miktar -= 1;
   }
 
+  saveCart();
   renderCart();
 }
 
@@ -190,15 +262,20 @@ function removeCartItem(productId) {
   }
 
   sepet.splice(itemIndex, 1);
+  saveCart();
   renderCart();
 }
 
 function clearCart() {
   sepet.length = 0;
+  saveCart();
   renderCart();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
+  loadCart();
+  document.getElementById("search-input").addEventListener("input", filterProducts);
+  document.getElementById("category-select").addEventListener("change", filterProducts);
+  filterProducts();
   renderCart();
 });

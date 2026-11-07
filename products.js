@@ -10,14 +10,14 @@ globalThis.products = [
     id: 2,
     isim: "Ekmek",
     fiyat: 12,
-    kategori: "Fırın Ürünleri",
+    kategori: "Unlu Mamuller",
     resimURL: "https://images.unsplash.com/photo-1509440159596-0249088772ff"
   },
   {
     id: 3,
     isim: "Elma (1 kg)",
     fiyat: 45,
-    kategori: "Meyve",
+    kategori: "Meyve & Sebze",
     resimURL: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6"
   },
   {
