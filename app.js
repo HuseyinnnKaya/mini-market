@@ -1,5 +1,6 @@
 const sepet = [];
 const CART_STORAGE_KEY = "mini-market-sepet";
+const THEME_STORAGE_KEY = "mini-market-theme";
 let toastTimeout;
 let orderSuccessMessage = "";
 
@@ -38,14 +39,28 @@ function renderProducts(products = globalThis.products) {
     const price = document.createElement("p");
     price.textContent = `${product.fiyat.toFixed(2)} TL`;
 
+    const remaining = getRemainingStock(product);
+    const stockInfo = document.createElement("p");
+    stockInfo.className = "product-stock";
+    stockInfo.textContent = `Stok: ${remaining}`;
+    if (remaining === 0) {
+      stockInfo.classList.add("out-of-stock");
+    }
+
     const addToCartButton = document.createElement("button");
     addToCartButton.type = "button";
-    addToCartButton.textContent = "Sepete Ekle";
+    addToCartButton.textContent = remaining === 0 ? "Stok Tükendi" : "Sepete Ekle";
+    addToCartButton.disabled = remaining === 0;
     addToCartButton.addEventListener("click", () => addToCart(product, true));
 
-    card.append(image, name, price, addToCartButton);
+    card.append(image, name, price, stockInfo, addToCartButton);
     productList.append(card);
   });
+}
+
+function getRemainingStock(product) {
+  const cartItem = sepet.find((item) => item.id === product.id);
+  return Math.max(0, product.stok - (cartItem ? cartItem.miktar : 0));
 }
 
 function filterProducts() {
@@ -81,15 +96,23 @@ function filterProducts() {
 }
 
 function addToCart(product, showNotification = false) {
-  const cartItem = sepet.find((item) => item.id === product.id);
+  const productDetails = globalThis.products.find((item) => item.id === product.id);
+
+  if (!productDetails || getRemainingStock(productDetails) === 0) {
+    filterProducts();
+    return;
+  }
+
+  const cartItem = sepet.find((item) => item.id === productDetails.id);
 
   if (cartItem) {
     cartItem.miktar += 1;
   } else {
-    sepet.push({ ...product, miktar: 1 });
+    sepet.push({ ...productDetails, miktar: 1 });
   }
 
   saveCart();
+  filterProducts();
   renderCart();
 
   if (showNotification) {
@@ -275,6 +298,7 @@ function decreaseCartItem(productId) {
   }
 
   saveCart();
+  filterProducts();
   renderCart();
 }
 
@@ -287,12 +311,14 @@ function removeCartItem(productId) {
 
   sepet.splice(itemIndex, 1);
   saveCart();
+  filterProducts();
   renderCart();
 }
 
 function clearCart() {
   sepet.length = 0;
   saveCart();
+  filterProducts();
   renderCart();
 }
 
@@ -304,10 +330,39 @@ function completeOrder() {
   sepet.length = 0;
   localStorage.removeItem(CART_STORAGE_KEY);
   orderSuccessMessage = "Siparişiniz başarıyla alındı! Teşekkür ederiz.";
+  filterProducts();
   renderCart();
 }
 
+function applyTheme(isDarkMode) {
+  const themeToggle = document.getElementById("theme-toggle");
+
+  if (!themeToggle) {
+    throw new Error("#theme-toggle butonu bulunamadı.");
+  }
+
+  document.body.classList.toggle("dark-mode", isDarkMode);
+  themeToggle.textContent = isDarkMode ? "☀️" : "🌙";
+  themeToggle.setAttribute(
+    "aria-label",
+    isDarkMode ? "Açık temaya geç" : "Koyu temaya geç"
+  );
+}
+
+function toggleTheme() {
+  const isDarkMode = !document.body.classList.contains("dark-mode");
+  applyTheme(isDarkMode);
+  localStorage.setItem(THEME_STORAGE_KEY, isDarkMode ? "dark" : "light");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const themeToggle = document.getElementById("theme-toggle");
+  if (!themeToggle) {
+    throw new Error("#theme-toggle butonu bulunamadı.");
+  }
+
+  applyTheme(localStorage.getItem(THEME_STORAGE_KEY) === "dark");
+  themeToggle.addEventListener("click", toggleTheme);
   loadCart();
   document.getElementById("search-input").addEventListener("input", filterProducts);
   document.getElementById("category-select").addEventListener("change", filterProducts);

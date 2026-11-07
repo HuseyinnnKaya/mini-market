@@ -4,6 +4,7 @@ globalThis.products = [
     isim: "Süt (1 L)",
     fiyat: 32.5,
     kategori: "Süt Ürünleri",
+    stok: 5,
     resimURL: "https://images.unsplash.com/photo-1550583724-b2692b85b150"
   },
   {
@@ -11,6 +12,7 @@ globalThis.products = [
     isim: "Ekmek",
     fiyat: 12,
     kategori: "Unlu Mamuller",
+    stok: 10,
     resimURL: "https://images.unsplash.com/photo-1509440159596-0249088772ff"
   },
   {
@@ -18,6 +20,7 @@ globalThis.products = [
     isim: "Elma (1 kg)",
     fiyat: 45,
     kategori: "Meyve & Sebze",
+    stok: 3,
     resimURL: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6"
   },
   {
@@ -25,6 +28,7 @@ globalThis.products = [
     isim: "Yumurta (10'lu)",
     fiyat: 68,
     kategori: "Kahvaltılık",
+    stok: 8,
     resimURL: "https://images.unsplash.com/photo-1506976785307-8732e854ad03"
   },
   {
@@ -32,6 +36,7 @@ globalThis.products = [
     isim: "Makarna (500 g)",
     fiyat: 24.9,
     kategori: "Temel Gıda",
+    stok: 7,
     resimURL: "https://images.unsplash.com/photo-1551462147-ff29053bfc14"
   }
 ];
