@@ -3,6 +3,7 @@ const CART_STORAGE_KEY = "mini-market-sepet";
 const THEME_STORAGE_KEY = "mini-market-theme";
 let toastTimeout;
 let orderSuccessMessage = "";
+let couponApplied = false;
 
 function renderProducts(products = globalThis.products) {
   const productList = document.getElementById("product-list");
@@ -28,6 +29,11 @@ function renderProducts(products = globalThis.products) {
   products.forEach((product) => {
     const card = document.createElement("article");
     card.className = "product-card";
+    card.addEventListener("click", (event) => {
+      if (!event.target.closest("button")) {
+        openProductModal(product);
+      }
+    });
 
     const image = document.createElement("img");
     image.src = product.resimURL;
@@ -56,6 +62,37 @@ function renderProducts(products = globalThis.products) {
     card.append(image, name, price, stockInfo, addToCartButton);
     productList.append(card);
   });
+}
+
+function openProductModal(product) {
+  const modal = document.getElementById("product-modal");
+  const image = document.getElementById("modal-product-image");
+  const title = document.getElementById("modal-product-title");
+  const description = document.getElementById("modal-product-description");
+  const price = document.getElementById("modal-product-price");
+
+  if (!modal || !image || !title || !description || !price) {
+    throw new Error("Ürün detay penceresinin içeriği bulunamadı.");
+  }
+
+  image.src = product.resimURL;
+  image.alt = product.isim;
+  title.textContent = product.isim;
+  description.textContent = product.aciklama || `${product.kategori} kategorisinde.`;
+  price.textContent = `${product.fiyat.toLocaleString("tr-TR", {
+    style: "currency",
+    currency: "TRY"
+  })}`;
+  modal.hidden = false;
+}
+
+function closeProductModal() {
+  const modal = document.getElementById("product-modal");
+  if (!modal) {
+    throw new Error("#product-modal alanı bulunamadı.");
+  }
+
+  modal.hidden = true;
 }
 
 function getRemainingStock(product) {
@@ -120,7 +157,7 @@ function addToCart(product, showNotification = false) {
   }
 }
 
-function showCartToast() {
+function showCartToast(message = "Ürün sepete eklendi!") {
   let toast = document.getElementById("cart-toast");
 
   if (!toast) {
@@ -132,7 +169,7 @@ function showCartToast() {
     document.body.append(toast);
   }
 
-  toast.textContent = "Ürün sepete eklendi!";
+  toast.textContent = message;
   toast.classList.add("is-visible");
 
   clearTimeout(toastTimeout);
@@ -214,14 +251,26 @@ function renderCart() {
     cartContent.append(itemsList);
   }
 
-  const total = sepet.reduce((sum, item) => sum + item.fiyat * item.miktar, 0);
-  const totalRow = document.createElement("p");
-  totalRow.className = "cart-total";
-  totalRow.textContent = `Toplam: ${total.toLocaleString("tr-TR", {
+  const subtotal = sepet.reduce((sum, item) => sum + item.fiyat * item.miktar, 0);
+  const discount = couponApplied ? subtotal * 0.1 : 0;
+  const total = subtotal - discount;
+  const formatPrice = (price) => price.toLocaleString("tr-TR", {
     style: "currency",
     currency: "TRY"
-  })}`;
-  cartContent.append(totalRow);
+  });
+
+  const subtotalRow = document.createElement("p");
+  subtotalRow.className = "cart-total-row";
+  subtotalRow.textContent = `Ara Toplam: ${formatPrice(subtotal)}`;
+
+  const discountRow = document.createElement("p");
+  discountRow.className = "cart-total-row cart-discount";
+  discountRow.textContent = `İndirim Tutarı: -${formatPrice(discount)}`;
+
+  const totalRow = document.createElement("p");
+  totalRow.className = "cart-total";
+  totalRow.textContent = `Genel Toplam: ${formatPrice(total)}`;
+  cartContent.append(subtotalRow, discountRow, totalRow);
 
   const clearCartButton = document.createElement("button");
   clearCartButton.type = "button";
@@ -317,9 +366,29 @@ function removeCartItem(productId) {
 
 function clearCart() {
   sepet.length = 0;
+  couponApplied = false;
   saveCart();
   filterProducts();
   renderCart();
+}
+
+function applyCoupon() {
+  const couponInput = document.getElementById("coupon-input");
+
+  if (!couponInput) {
+    throw new Error("#coupon-input alanı bulunamadı.");
+  }
+
+  const couponCode = couponInput.value.trim().toLocaleUpperCase("tr-TR");
+  if (couponCode === "KAYA10" || couponCode === "YUZDE10") {
+    couponApplied = true;
+    renderCart();
+    return;
+  }
+
+  couponApplied = false;
+  renderCart();
+  showCartToast("Geçersiz kupon!");
 }
 
 function completeOrder() {
@@ -328,6 +397,7 @@ function completeOrder() {
   }
 
   sepet.length = 0;
+  couponApplied = false;
   localStorage.removeItem(CART_STORAGE_KEY);
   orderSuccessMessage = "Siparişiniz başarıyla alındı! Teşekkür ederiz.";
   filterProducts();
@@ -367,6 +437,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("search-input").addEventListener("input", filterProducts);
   document.getElementById("category-select").addEventListener("change", filterProducts);
   document.getElementById("sort-select").addEventListener("change", filterProducts);
+  document.getElementById("apply-coupon-btn").addEventListener("click", applyCoupon);
+  const productModal = document.getElementById("product-modal");
+  const closeModalButton = productModal?.querySelector(".close-modal");
+  if (!productModal || !closeModalButton) {
+    throw new Error("Ürün detay penceresi veya kapatma düğmesi bulunamadı.");
+  }
+  closeModalButton.addEventListener("click", closeProductModal);
+  productModal.addEventListener("click", (event) => {
+    if (event.target === productModal) {
+      closeProductModal();
+    }
+  });
   filterProducts();
   renderCart();
 });

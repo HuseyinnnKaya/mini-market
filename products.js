@@ -5,6 +5,7 @@ globalThis.products = [
     fiyat: 32.5,
     kategori: "Süt Ürünleri",
     stok: 5,
+    aciklama: "Günlük taze, tam yağlı inek sütü.",
     resimURL: "https://images.unsplash.com/photo-1550583724-b2692b85b150"
   },
   {
@@ -13,6 +14,7 @@ globalThis.products = [
     fiyat: 12,
     kategori: "Unlu Mamuller",
     stok: 10,
+    aciklama: "Her gün taze pişirilen çıtır ekmek.",
     resimURL: "https://images.unsplash.com/photo-1509440159596-0249088772ff"
   },
   {
@@ -21,6 +23,7 @@ globalThis.products = [
     fiyat: 45,
     kategori: "Meyve & Sebze",
     stok: 3,
+    aciklama: "Taze ve lezzetli, özenle seçilmiş elma.",
     resimURL: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6"
   },
   {
@@ -29,6 +32,7 @@ globalThis.products = [
     fiyat: 68,
     kategori: "Kahvaltılık",
     stok: 8,
+    aciklama: "Günlük, taze ve protein bakımından zengin yumurta.",
     resimURL: "https://images.unsplash.com/photo-1506976785307-8732e854ad03"
   },
   {
@@ -37,6 +41,7 @@ globalThis.products = [
     fiyat: 24.9,
     kategori: "Temel Gıda",
     stok: 7,
+    aciklama: "Pratik öğünler için kaliteli durum buğdayı makarnası.",
     resimURL: "https://images.unsplash.com/photo-1551462147-ff29053bfc14"
   }
 ];

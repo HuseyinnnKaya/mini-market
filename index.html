@@ -36,5 +36,20 @@
         <h2>Sepet</h2>
       </aside>
     </main>
+
+    <section id="coupon-section" aria-label="İndirim kuponu">
+      <input id="coupon-input" type="text" placeholder="Kupon Kodu" aria-label="Kupon Kodu">
+      <button id="apply-coupon-btn" type="button">Uygula</button>
+    </section>
+
+    <div id="product-modal" class="product-modal" hidden>
+      <section class="product-modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-product-title">
+        <button class="close-modal" type="button" aria-label="Pencereyi kapat">&times;</button>
+        <img id="modal-product-image" src="" alt="">
+        <h2 id="modal-product-title"></h2>
+        <p id="modal-product-description"></p>
+        <p id="modal-product-price" class="modal-product-price"></p>
+      </section>
+    </div>
   </body>
 </html>
