@@ -28,6 +28,11 @@ function renderProducts(products = globalThis.products) {
       }
     });
 
+    const image = document.createElement("img");
+    image.src = product.image || product.resimURL;
+    image.alt = product.title || product.isim;
+    image.className = "product-img";
+
     const wishlistButton = document.createElement("button");
     const isFavorite = globalThis.isFavorite(product.id);
     wishlistButton.type = "button";
@@ -38,10 +43,6 @@ function renderProducts(products = globalThis.products) {
       : `${product.isim} ürününü favorilere ekle`);
     wishlistButton.setAttribute("aria-pressed", String(isFavorite));
     wishlistButton.addEventListener("click", () => globalThis.toggleFavorite(product.id));
-
-    const image = document.createElement("img");
-    image.src = product.resimURL;
-    image.alt = product.isim;
 
     const name = document.createElement("h2");
     name.textContent = product.isim;
@@ -63,7 +64,7 @@ function renderProducts(products = globalThis.products) {
     addToCartButton.disabled = remaining === 0;
     addToCartButton.addEventListener("click", () => globalThis.addToCart(product, true));
 
-    card.append(wishlistButton, image, name, price, stockInfo, addToCartButton);
+    card.append(image, wishlistButton, name, price, stockInfo, addToCartButton);
     productList.append(card);
   });
 }
