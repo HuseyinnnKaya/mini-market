@@ -1,8 +1,11 @@
+function getProductImageUrl(productId) {
+  return `https://picsum.photos/seed/${productId}/300/200`;
+}
+
 const productCatalog = [
   {
     kategori: "İçecekler",
     baslangicFiyati: 12,
-    image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Kola",
       "Portakallı gazoz",
@@ -24,7 +27,6 @@ const productCatalog = [
   {
     kategori: "Tatlılar",
     baslangicFiyati: 28,
-    image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Sütlaç",
       "Fıstıklı baklava",
@@ -46,7 +48,6 @@ const productCatalog = [
   {
     kategori: "Meyve & Sebze",
     baslangicFiyati: 18,
-    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Elma",
       "Armut",
@@ -67,7 +68,6 @@ const productCatalog = [
   {
     kategori: "Süt Ürünleri",
     baslangicFiyati: 24,
-    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Süt",
       "Yoğurt",
@@ -88,7 +88,6 @@ const productCatalog = [
   {
     kategori: "Unlu Mamuller",
     baslangicFiyati: 10,
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Ekmek",
       "Simit",
@@ -109,7 +108,6 @@ const productCatalog = [
   {
     kategori: "Bakliyat",
     baslangicFiyati: 20,
-    image: "https://images.unsplash.com/photo-1515543904379-3d757f8f6b6?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Kırmızı mercimek",
       "Yeşil mercimek",
@@ -130,7 +128,6 @@ const productCatalog = [
   {
     kategori: "Atıştırmalıklar",
     baslangicFiyati: 14,
-    image: "https://images.unsplash.com/photo-1621939514649-280e2aa9f12?auto=format&fit=crop&w=640&q=80",
     urunler: [
       "Patates cipsi",
       "Kraker",
@@ -155,6 +152,7 @@ const products = [];
 productCatalog.forEach(({ kategori, baslangicFiyati, urunler }) => {
   urunler.forEach((isim, index) => {
     const id = products.length + 1;
+    const image = getProductImageUrl(id);
 
     products.push({
       id,
@@ -163,8 +161,8 @@ productCatalog.forEach(({ kategori, baslangicFiyati, urunler }) => {
       fiyat: Number((baslangicFiyati + index * 2.5).toFixed(2)),
       stok: ((id - 1) % 20) + 1,
       aciklama: `${isim}, ${kategori.toLocaleLowerCase("tr-TR")} kategorisinden taze ve özenle seçilmiş bir üründür.`,
-      image: productCatalog.find((item) => item.kategori === kategori).image,
-      resimURL: productCatalog.find((item) => item.kategori === kategori).image
+      image,
+      resimURL: image
     });
   });
 });

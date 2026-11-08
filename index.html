@@ -85,5 +85,43 @@
     </form>
   </div>
 </div>
+<!-- Ödeme (Checkout) Modalı -->
+<div id="checkout-modal" class="product-modal" hidden>
+  <div class="product-modal-content">
+    <button id="close-checkout-modal" type="button" class="close-modal">&times;</button>
+    <h2>💳 Ödeme ve Teslimat Bilgileri</h2>
+    <form id="checkout-form">
+      <input type="text" id="customer-name" placeholder="Ad Soyad" required>
+      <input type="email" id="customer-email" placeholder="E-posta Adresi" required>
+      <textarea id="customer-address" placeholder="Teslimat Adresi" required></textarea>
+      <select id="payment-method" required>
+        <option value="Kapıda Ödeme">Kapıda Nakit / Kart</option>
+        <option value="Kredi Kartı">Kredi Kartı / Banka Kartı</option>
+      </select>
+      <button type="submit" class="admin-submit-btn">Siparişi Onayla</button>
+    </form>
+  </div>
+</div>
+
+<!-- Fatura / Makbuz Modalı -->
+<div id="receipt-modal" class="product-modal" hidden>
+  <div class="product-modal-content receipt-content">
+    <button id="close-receipt-modal" type="button" class="close-modal">&times;</button>
+    <div id="receipt-print-area">
+      <h2>🧾 Mini Market Sipariş Faturası</h2>
+      <p><strong>Sipariş No:</strong> <span id="receipt-id"></span></p>
+      <p><strong>Tarih:</strong> <span id="receipt-date"></span></p>
+      <hr>
+      <p><strong>Müşteri:</strong> <span id="receipt-customer"></span></p>
+      <p><strong>Adres:</strong> <span id="receipt-address"></span></p>
+      <hr>
+      <h3>Ürünler</h3>
+      <ul id="receipt-items-list"></ul>
+      <hr>
+      <p><strong>Genel Toplam:</strong> <span id="receipt-total"></span> TL</p>
+    </div>
+    <button id="print-receipt-btn" type="button" class="admin-submit-btn">🖨️ Faturayı Yazdır / PDF İndir</button>
+  </div>
+</div>
   </body>
 </html>

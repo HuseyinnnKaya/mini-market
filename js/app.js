@@ -32,6 +32,10 @@ function renderProducts(products = globalThis.products) {
     image.src = product.image || product.resimURL;
     image.alt = product.title || product.isim;
     image.className = "product-img";
+    image.onerror = function () {
+      this.onerror = null;
+      this.src = "https://picsum.photos/300/200";
+    };
 
     const wishlistButton = document.createElement("button");
     const isFavorite = globalThis.isFavorite(product.id);
