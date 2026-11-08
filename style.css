@@ -51,7 +51,7 @@ body {
 
 header {
   display: grid;
-  grid-template-columns: minmax(180px, 2fr) minmax(160px, 1fr) minmax(200px, 1.4fr) auto;
+  grid-template-columns: minmax(180px, 2fr) minmax(160px, 1fr) minmax(200px, 1.4fr) minmax(160px, auto) auto;
   gap: 0.85rem;
   padding: 1.25rem clamp(1rem, 4vw, 3rem);
   background: var(--accent);
@@ -88,6 +88,41 @@ header h1 {
 #category-select,
 #sort-select {
   cursor: pointer;
+}
+
+#wishlist-filter-btn {
+  min-height: 2.85rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgb(255 255 255 / 20%), rgb(255 255 255 / 8%));
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgb(22 57 38 / 12%);
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+#wishlist-filter-btn:hover,
+#wishlist-filter-btn.is-active {
+  border-color: rgb(255 255 255 / 70%);
+  background: linear-gradient(135deg, rgb(255 255 255 / 30%), rgb(255 255 255 / 16%));
+  box-shadow: 0 4px 10px rgb(22 57 38 / 18%);
+}
+
+#wishlist-filter-btn:hover {
+  transform: translateY(-1px);
+}
+
+#wishlist-filter-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+#wishlist-filter-btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 #search-input:focus,
@@ -138,6 +173,7 @@ main {
 }
 
 .product-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -202,6 +238,59 @@ main {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 160ms ease;
+}
+
+.product-card .wishlist-toggle {
+  position: absolute;
+  z-index: 1;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: #b4232d;
+  font-size: 1.35rem;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgb(30 55 38 / 14%);
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease,
+    color 180ms ease, transform 180ms ease;
+}
+
+.product-card .wishlist-toggle:hover {
+  border-color: #f0a3ad;
+  background: var(--surface-hover);
+  box-shadow: 0 4px 12px rgb(180 35 45 / 22%);
+  transform: scale(1.06);
+}
+
+.product-card .wishlist-toggle[aria-pressed="true"] {
+  border-color: #f3a0aa;
+  background: #fff0f2;
+  color: #e11d48;
+  box-shadow: 0 3px 10px rgb(225 29 72 / 22%);
+  transform: scale(1.12);
+}
+
+.product-card .wishlist-toggle[aria-pressed="true"]:hover {
+  background: #ffe3e8;
+  box-shadow: 0 5px 14px rgb(225 29 72 / 30%);
+  transform: scale(1.18);
+}
+
+.dark-mode .product-card .wishlist-toggle[aria-pressed="true"] {
+  border-color: #a64b5b;
+  background: #482b32;
+  color: #ff8296;
+}
+
+.dark-mode .product-card .wishlist-toggle[aria-pressed="true"]:hover {
+  background: #5a3039;
 }
 
 .product-card button:hover {
@@ -577,6 +666,12 @@ main {
 .dark-mode .cart-toast {
   border-color: #286c49;
   background: #245c3e;
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  header {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {

@@ -1,9 +1,12 @@
 const sepet = [];
+const favoriler = [];
 const CART_STORAGE_KEY = "mini-market-sepet";
+const WISHLIST_STORAGE_KEY = "mini-market-favoriler";
 const THEME_STORAGE_KEY = "mini-market-theme";
 let toastTimeout;
 let orderSuccessMessage = "";
 let couponApplied = false;
+let wishlistFilterActive = false;
 
 function renderProducts(products = globalThis.products) {
   const productList = document.getElementById("product-list");
@@ -35,6 +38,17 @@ function renderProducts(products = globalThis.products) {
       }
     });
 
+    const wishlistButton = document.createElement("button");
+    const isFavorite = favoriler.includes(product.id);
+    wishlistButton.type = "button";
+    wishlistButton.className = "wishlist-toggle";
+    wishlistButton.textContent = isFavorite ? "❤️" : "♡";
+    wishlistButton.setAttribute("aria-label", isFavorite
+      ? `${product.isim} ürününü favorilerden çıkar`
+      : `${product.isim} ürününü favorilere ekle`);
+    wishlistButton.setAttribute("aria-pressed", String(isFavorite));
+    wishlistButton.addEventListener("click", () => toggleFavorite(product.id));
+
     const image = document.createElement("img");
     image.src = product.resimURL;
     image.alt = product.isim;
@@ -59,7 +73,7 @@ function renderProducts(products = globalThis.products) {
     addToCartButton.disabled = remaining === 0;
     addToCartButton.addEventListener("click", () => addToCart(product, true));
 
-    card.append(image, name, price, stockInfo, addToCartButton);
+    card.append(wishlistButton, image, name, price, stockInfo, addToCartButton);
     productList.append(card);
   });
 }
@@ -119,8 +133,9 @@ function filterProducts() {
     const matchesName = product.isim.toLocaleLowerCase("tr-TR").includes(searchTerm);
     const matchesCategory =
       selectedCategory === "Tümü" || product.kategori === selectedCategory;
+    const matchesWishlist = !wishlistFilterActive || favoriler.includes(product.id);
 
-    return matchesName && matchesCategory;
+    return matchesName && matchesCategory && matchesWishlist;
   });
 
   if (sortSelect.value === "price-asc") {
@@ -130,6 +145,47 @@ function filterProducts() {
   }
 
   renderProducts(filteredProducts);
+}
+
+function toggleFavorite(productId) {
+  const favoriteIndex = favoriler.indexOf(productId);
+
+  if (favoriteIndex === -1) {
+    favoriler.push(productId);
+  } else {
+    favoriler.splice(favoriteIndex, 1);
+  }
+
+  saveWishlist();
+  filterProducts();
+}
+
+function saveWishlist() {
+  localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(favoriler));
+}
+
+function loadWishlist() {
+  const savedWishlist = localStorage.getItem(WISHLIST_STORAGE_KEY);
+
+  if (savedWishlist === null) {
+    return;
+  }
+
+  let parsedWishlist;
+  try {
+    parsedWishlist = JSON.parse(savedWishlist);
+  } catch (error) {
+    throw new Error("Kaydedilmiş favori verisi geçerli JSON değil.", { cause: error });
+  }
+
+  if (
+    !Array.isArray(parsedWishlist) ||
+    parsedWishlist.some((productId) => !Number.isInteger(productId))
+  ) {
+    throw new Error("Kaydedilmiş favori verisi beklenen biçimde değil.");
+  }
+
+  favoriler.push(...new Set(parsedWishlist));
 }
 
 function addToCart(product, showNotification = false) {
@@ -434,9 +490,20 @@ document.addEventListener("DOMContentLoaded", () => {
   applyTheme(localStorage.getItem(THEME_STORAGE_KEY) === "dark");
   themeToggle.addEventListener("click", toggleTheme);
   loadCart();
+  loadWishlist();
   document.getElementById("search-input").addEventListener("input", filterProducts);
   document.getElementById("category-select").addEventListener("change", filterProducts);
   document.getElementById("sort-select").addEventListener("change", filterProducts);
+  const wishlistFilterButton = document.getElementById("wishlist-filter-btn");
+  if (!wishlistFilterButton) {
+    throw new Error("#wishlist-filter-btn butonu bulunamadı.");
+  }
+  wishlistFilterButton.addEventListener("click", () => {
+    wishlistFilterActive = !wishlistFilterActive;
+    wishlistFilterButton.setAttribute("aria-pressed", String(wishlistFilterActive));
+    wishlistFilterButton.classList.toggle("is-active", wishlistFilterActive);
+    filterProducts();
+  });
   document.getElementById("apply-coupon-btn").addEventListener("click", applyCoupon);
   const productModal = document.getElementById("product-modal");
   const closeModalButton = productModal?.querySelector(".close-modal");
