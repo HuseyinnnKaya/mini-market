@@ -84,6 +84,113 @@
   background: rgb(255 255 255 / 22%);
 }
 
+#price-filter-container {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+
+#price-filter-container label {
+  overflow: hidden;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#price-val {
+  font-variant-numeric: tabular-nums;
+}
+
+#price-range {
+  width: 100%;
+  min-width: 0;
+  height: 1.1rem;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a9e3bd, #fff);
+  cursor: pointer;
+}
+
+#price-range::-webkit-slider-thumb {
+  width: 1rem;
+  height: 1rem;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 28%);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+#price-range::-moz-range-thumb {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 28%);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+#price-range:hover::-webkit-slider-thumb,
+#price-range:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 22%);
+}
+
+#price-range:hover::-moz-range-thumb,
+#price-range:focus-visible::-moz-range-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 22%);
+}
+
+#price-range:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+#stock-filter-label {
+  display: flex;
+  min-width: 0;
+  min-height: 2.85rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+#in-stock-checkbox {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: #a9e3bd;
+  cursor: pointer;
+}
+
+#in-stock-checkbox:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
 #product-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));

@@ -14,9 +14,11 @@ function filterProducts() {
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const sortSelect = document.getElementById("sort-select");
+  const priceRange = document.getElementById("price-range");
+  const inStockCheckbox = document.getElementById("in-stock-checkbox");
 
-  if (!searchInput || !categorySelect || !sortSelect) {
-    throw new Error("Arama, kategori veya sıralama seçimi bulunamadı.");
+  if (!searchInput || !categorySelect || !sortSelect || !priceRange || !inStockCheckbox) {
+    throw new Error("Arama, kategori, sıralama veya ek filtre alanlarından biri bulunamadı.");
   }
 
   if (!Array.isArray(globalThis.products)) {
@@ -25,12 +27,20 @@ function filterProducts() {
 
   const searchTerm = searchInput.value.trim().toLocaleLowerCase("tr-TR");
   const selectedCategory = categorySelect.value;
+  const maximumPrice = Number(priceRange.value);
   const filteredProducts = globalThis.products.filter((product) => {
     const matchesName = product.isim.toLocaleLowerCase("tr-TR").includes(searchTerm);
     const matchesCategory =
       selectedCategory === "Tümü" || product.kategori === selectedCategory;
+    const matchesPrice = product.fiyat <= maximumPrice;
+    const matchesStock =
+      !inStockCheckbox.checked || globalThis.getRemainingStock(product) > 0;
 
-    return matchesName && matchesCategory && matchesWishlistFilter(product);
+    return matchesName &&
+      matchesCategory &&
+      matchesWishlistFilter(product) &&
+      matchesPrice &&
+      matchesStock;
   });
 
   if (sortSelect.value === "price-asc") {

@@ -86,6 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
   const sortSelect = document.getElementById("sort-select");
+  const priceRange = document.getElementById("price-range");
+  const priceValue = document.getElementById("price-val");
+  const inStockCheckbox = document.getElementById("in-stock-checkbox");
   const applyCouponButton = document.getElementById("apply-coupon-btn");
   const productModal = document.getElementById("product-modal");
   const closeModalButton = productModal?.querySelector(".close-modal");
@@ -96,6 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
     !searchInput ||
     !categorySelect ||
     !sortSelect ||
+    !priceRange ||
+    !priceValue ||
+    !inStockCheckbox ||
     !applyCouponButton ||
     !productModal ||
     !closeModalButton
@@ -112,6 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
   searchInput.addEventListener("input", globalThis.filterProducts);
   categorySelect.addEventListener("change", globalThis.filterProducts);
   sortSelect.addEventListener("change", globalThis.filterProducts);
+  const updatePriceFilter = () => {
+    priceValue.textContent = priceRange.value;
+    globalThis.filterProducts();
+  };
+  priceRange.addEventListener("input", updatePriceFilter);
+  priceRange.addEventListener("change", updatePriceFilter);
+  inStockCheckbox.addEventListener("input", globalThis.filterProducts);
+  inStockCheckbox.addEventListener("change", globalThis.filterProducts);
   applyCouponButton.addEventListener("click", globalThis.applyCoupon);
   closeModalButton.addEventListener("click", globalThis.closeProductModal);
   productModal.addEventListener("click", (event) => {
