@@ -78,6 +78,139 @@
   outline-offset: 2px;
 }
 
+#product-reviews-section {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-separator);
+}
+
+#product-reviews-section h3,
+#add-review-form h4 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+#modal-rating-summary {
+  width: fit-content;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+#avg-rating {
+  color: var(--accent);
+  font-weight: 750;
+}
+
+#reviews-list {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 16rem;
+  overflow-y: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+}
+
+#reviews-list > p {
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.product-review {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-separator);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 2px 6px rgb(30 55 38 / 5%);
+}
+
+.product-review-rating {
+  margin: 0 0 0.4rem;
+  color: #d48a16 !important;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+}
+
+.product-review-comment {
+  margin: 0 0 0.65rem;
+  color: var(--text-secondary) !important;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.product-review-date {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+#add-review-form {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+}
+
+#add-review-form select,
+#add-review-form textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+#add-review-form textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+#add-review-form select:focus-visible,
+#add-review-form textarea:focus-visible {
+  border-color: var(--focus);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(158 215 181 / 35%);
+}
+
+#add-review-form button[type="submit"] {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+
+#add-review-form button[type="submit"]:hover {
+  transform: translateY(-1px);
+  background: var(--accent-hover);
+}
+
+#add-review-form button[type="submit"]:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
 #checkout-form {
   display: grid;
   gap: 0.9rem;

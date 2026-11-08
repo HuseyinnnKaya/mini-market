@@ -60,6 +60,28 @@
         <h2 id="modal-product-title"></h2>
         <p id="modal-product-description"></p>
         <p id="modal-product-price" class="modal-product-price"></p>
+        <hr>
+<div id="product-reviews-section">
+  <h3>⭐ Değerlendirmeler ve Yorumlar</h3>
+  <div id="modal-rating-summary">Ortalama Puan: <span id="avg-rating">0</span> / 5</div>
+  
+  <!-- Yorum Listesi -->
+  <div id="reviews-list"></div>
+
+  <!-- Yorum Ekleme Formu -->
+  <form id="add-review-form">
+    <h4>Yorum Yap</h4>
+    <select id="review-rating" required>
+      <option value="5">⭐⭐⭐⭐⭐ (5 Yıldız)</option>
+      <option value="4">⭐⭐⭐⭐ (4 Yıldız)</option>
+      <option value="3">⭐⭐⭐ (3 Yıldız)</option>
+      <option value="2">⭐⭐ (2 Yıldız)</option>
+      <option value="1">⭐ (1 Yıldız)</option>
+    </select>
+    <textarea id="review-comment" placeholder="Ürün hakkında görüşleriniz..." required></textarea>
+    <button type="submit" class="admin-submit-btn">Yorum Gönder</button>
+  </form>
+</div>
       </section>
     </div>
     <div id="admin-modal" class="admin-modal" hidden>

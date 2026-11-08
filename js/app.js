@@ -54,6 +54,13 @@ function renderProducts(products = globalThis.products) {
     const price = document.createElement("p");
     price.textContent = `${product.fiyat.toFixed(2)} TL`;
 
+    const averageRating = globalThis.getProductAverageRating(product.id);
+    const rating = document.createElement("p");
+    rating.className = "product-rating";
+    rating.textContent = averageRating === null
+      ? "⭐ Puan yok"
+      : `⭐ ${averageRating.toFixed(1)} / 5`;
+
     const remaining = globalThis.getRemainingStock(product);
     const stockInfo = document.createElement("p");
     stockInfo.className = "product-stock";
@@ -68,7 +75,7 @@ function renderProducts(products = globalThis.products) {
     addToCartButton.disabled = remaining === 0;
     addToCartButton.addEventListener("click", () => globalThis.addToCart(product, true));
 
-    card.append(image, wishlistButton, name, price, stockInfo, addToCartButton);
+    card.append(image, wishlistButton, name, price, rating, stockInfo, addToCartButton);
     productList.append(card);
   });
 }

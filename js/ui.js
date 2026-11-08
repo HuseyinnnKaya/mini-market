@@ -21,6 +21,134 @@ function showToast(message = "Ürün sepete eklendi!") {
   }, 2000);
 }
 
+function getProductReviews(productId) {
+  const savedReviews = localStorage.getItem("yorumlar");
+  if (savedReviews === null) {
+    return { reviewData: {}, reviews: [] };
+  }
+
+  let reviewData;
+  try {
+    reviewData = JSON.parse(savedReviews);
+  } catch (error) {
+    throw new Error("Kaydedilmiş yorum verisi geçerli JSON değil.", { cause: error });
+  }
+
+  if (!reviewData || typeof reviewData !== "object" || Array.isArray(reviewData)) {
+    throw new Error("Kaydedilmiş yorum verisi beklenen biçimde değil.");
+  }
+
+  const reviews = reviewData[String(productId)] || [];
+  if (
+    !Array.isArray(reviews) ||
+    reviews.some((review) =>
+      !review ||
+      !Number.isInteger(review.puan) ||
+      review.puan < 1 ||
+      review.puan > 5 ||
+      typeof review.yorum !== "string" ||
+      typeof review.tarih !== "string"
+    )
+  ) {
+    throw new Error(`Ürün ${productId} için kaydedilmiş yorumlar beklenen biçimde değil.`);
+  }
+
+  return { reviewData, reviews };
+}
+
+function getProductAverageRating(productId) {
+  const { reviews } = getProductReviews(productId);
+  if (reviews.length === 0) {
+    return null;
+  }
+
+  return reviews.reduce((sum, review) => sum + review.puan, 0) / reviews.length;
+}
+
+function renderProductReviews(productId) {
+  const averageRating = document.getElementById("avg-rating");
+  const reviewsList = document.getElementById("reviews-list");
+
+  if (!averageRating || !reviewsList) {
+    throw new Error("Ürün yorum alanları bulunamadı.");
+  }
+
+  const { reviews } = getProductReviews(productId);
+  const average = reviews.length
+    ? reviews.reduce((sum, review) => sum + review.puan, 0) / reviews.length
+    : 0;
+  averageRating.textContent = average.toFixed(1);
+  reviewsList.replaceChildren();
+
+  if (reviews.length === 0) {
+    const emptyMessage = document.createElement("p");
+    emptyMessage.textContent = "Bu ürün için henüz yorum yok.";
+    reviewsList.append(emptyMessage);
+    return;
+  }
+
+  reviews.forEach((review) => {
+    const reviewItem = document.createElement("article");
+    reviewItem.className = "product-review";
+
+    const rating = document.createElement("p");
+    rating.className = "product-review-rating";
+    rating.textContent = `${"★".repeat(review.puan)}${"☆".repeat(5 - review.puan)}`;
+
+    const comment = document.createElement("p");
+    comment.className = "product-review-comment";
+    comment.textContent = review.yorum;
+
+    const date = document.createElement("time");
+    date.className = "product-review-date";
+    date.dateTime = review.tarih;
+    date.textContent = new Date(review.tarih).toLocaleString("tr-TR");
+
+    reviewItem.append(rating, comment, date);
+    reviewsList.append(reviewItem);
+  });
+}
+
+function submitProductReview(event) {
+  event.preventDefault();
+
+  const modal = document.getElementById("product-modal");
+  const ratingInput = document.getElementById("review-rating");
+  const commentInput = document.getElementById("review-comment");
+  const form = event.currentTarget;
+
+  if (!modal || !ratingInput || !commentInput) {
+    throw new Error("Yorum formu alanlarından biri bulunamadı.");
+  }
+
+  const productId = Number(modal.dataset.productId);
+  if (!Number.isInteger(productId)) {
+    throw new Error("Yorum yapılacak ürün seçili değil.");
+  }
+
+  const puan = Number(ratingInput.value);
+  const yorum = commentInput.value.trim();
+  if (!Number.isInteger(puan) || puan < 1 || puan > 5 || !yorum) {
+    form.reportValidity();
+    return;
+  }
+
+  const { reviewData, reviews } = getProductReviews(productId);
+  const nextReviews = [
+    ...reviews,
+    {
+      puan,
+      yorum,
+      tarih: new Date().toISOString()
+    }
+  ];
+  reviewData[String(productId)] = nextReviews;
+  localStorage.setItem("yorumlar", JSON.stringify(reviewData));
+
+  form.reset();
+  renderProductReviews(productId);
+}
+
 function openProductModal(product) {
   const modal = document.getElementById("product-modal");
   const image = document.getElementById("modal-product-image");
@@ -40,6 +168,8 @@ function openProductModal(product) {
     style: "currency",
     currency: "TRY"
   })}`;
+  modal.dataset.productId = String(product.id);
+  renderProductReviews(product.id);
   modal.hidden = false;
 }
 
@@ -52,6 +182,16 @@ function closeProductModal() {
   modal.hidden = true;
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const reviewForm = document.getElementById("add-review-form");
+  if (!reviewForm) {
+    throw new Error("#add-review-form alanı bulunamadı.");
+  }
+
+  reviewForm.addEventListener("submit", submitProductReview);
+});
+
 globalThis.showToast = showToast;
+globalThis.getProductAverageRating = getProductAverageRating;
 globalThis.openProductModal = openProductModal;
 globalThis.closeProductModal = closeProductModal;
