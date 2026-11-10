@@ -191,16 +191,24 @@ document.addEventListener("DOMContentLoaded", () => {
   reviewForm.addEventListener("submit", submitProductReview);
 
   const loginToggleButton = document.getElementById("login-toggle-btn");
+  const wishlistFilterButton = document.getElementById("wishlist-filter-btn");
   const loginModal = document.getElementById("login-modal");
   const closeLoginModalButton = document.getElementById("close-login-modal");
 
-  if (!loginToggleButton || !loginModal || !closeLoginModalButton) {
+  if (
+    !loginToggleButton ||
+    !wishlistFilterButton ||
+    !loginModal ||
+    !closeLoginModalButton
+  ) {
     throw new Error("Giriş penceresi alanlarından biri bulunamadı.");
   }
 
-  loginToggleButton.addEventListener("click", () => {
+  const openLoginModal = () => {
     loginModal.hidden = false;
-  });
+  };
+  loginToggleButton.addEventListener("click", openLoginModal);
+  wishlistFilterButton.addEventListener("click", openLoginModal);
   closeLoginModalButton.addEventListener("click", () => {
     loginModal.hidden = true;
   });

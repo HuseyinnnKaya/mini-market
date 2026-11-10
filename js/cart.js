@@ -13,7 +13,18 @@ function getCartTotal() {
   return subtotal - (couponApplied ? subtotal * 0.1 : 0);
 }
 
+function getCouponInput() {
+  return document.getElementById("cart-page-coupon-input") ||
+    document.getElementById("coupon-input");
+}
+
 function refreshProducts() {
+  const productList = document.getElementById("product-list");
+  if (productList?.dataset.view === "cart") {
+    globalThis.renderCartPage();
+    return;
+  }
+
   const filterControlIds = [
     "search-input",
     "category-select",
@@ -63,50 +74,64 @@ function addToCart(productOrId, showNotification = typeof productOrId === "numbe
 }
 
 function renderCart() {
-  const cart = document.getElementById("cart");
+  const cartItems = document.getElementById("cart-items-modal");
+  const subtotalValue = document.getElementById("cart-subtotal");
+  const discountValue = document.getElementById("cart-discount");
+  const totalValue = document.getElementById("cart-grand-total");
+  const cartBadge = document.getElementById("cart-badge");
+  const clearCartButton = document.getElementById("clear-cart-btn");
 
-  if (!cart) {
-    throw new Error("#cart alanı bulunamadı.");
+  if (!cartItems || !subtotalValue || !discountValue || !totalValue || !cartBadge || !clearCartButton) {
+    throw new Error("Sepet penceresi alanlarından biri bulunamadı.");
   }
 
-  let cartContent = document.getElementById("cart-content");
-  if (!cartContent) {
-    cartContent = document.createElement("div");
-    cartContent.id = "cart-content";
-    cart.append(cartContent);
-  }
-
-  cartContent.replaceChildren();
+  cartItems.replaceChildren();
   const formatPrice = (price) => price.toLocaleString("tr-TR", {
     style: "currency",
     currency: "TRY"
   });
 
+  cartBadge.textContent = String(
+    sepet.reduce((quantity, item) => quantity + item.miktar, 0)
+  );
+  clearCartButton.disabled = sepet.length === 0;
+
   if (sepet.length === 0) {
     const emptyMessage = document.createElement("p");
-    emptyMessage.textContent = "🛒 Sepetinizde ürün bulunmamaktadır";
-    cartContent.append(emptyMessage);
+    emptyMessage.className = "cart-empty-message";
+    emptyMessage.textContent = "🛒 Sepetinizde henüz ürün yok.";
+    cartItems.append(emptyMessage);
   } else {
     const itemsList = document.createElement("ul");
     itemsList.className = "cart-items";
 
     sepet.forEach((item) => {
       const listItem = document.createElement("li");
-      listItem.className = "cart-item";
+      listItem.className = "cart-modal-item cart-item";
+
+      const itemImage = document.createElement("img");
+      itemImage.className = "cart-item-img cart-item-image";
+      itemImage.src = item.image || item.resimURL || "";
+      itemImage.alt = item.isim;
+      itemImage.loading = "lazy";
+
+      const itemDetails = document.createElement("div");
+      itemDetails.className = "cart-item-details";
 
       const itemName = document.createElement("span");
       itemName.className = "cart-item-name";
       itemName.textContent = item.isim;
 
-      const itemTotal = document.createElement("span");
-      itemTotal.className = "cart-item-total";
-      itemTotal.textContent = `Birim fiyat: ${formatPrice(item.fiyat)}`;
+      const unitPrice = document.createElement("span");
+      unitPrice.className = "cart-item-unit-price";
+      unitPrice.textContent = `Birim fiyat: ${formatPrice(item.fiyat)}`;
 
       const quantityControls = document.createElement("div");
       quantityControls.className = "cart-quantity";
 
       const decreaseButton = document.createElement("button");
       decreaseButton.type = "button";
+      decreaseButton.className = "qty-btn";
       decreaseButton.textContent = "-";
       decreaseButton.setAttribute("aria-label", `${item.isim} miktarını azalt`);
       decreaseButton.addEventListener("click", () => decreaseCartItem(item.id));
@@ -117,6 +142,7 @@ function renderCart() {
 
       const increaseButton = document.createElement("button");
       increaseButton.type = "button";
+      increaseButton.className = "qty-btn";
       increaseButton.textContent = "+";
       increaseButton.setAttribute("aria-label", `${item.isim} miktarını artır`);
       increaseButton.addEventListener("click", () => addToCart(item));
@@ -124,59 +150,254 @@ function renderCart() {
       const deleteButton = document.createElement("button");
       deleteButton.type = "button";
       deleteButton.className = "cart-delete-button";
-      deleteButton.textContent = "Sil";
+      deleteButton.textContent = "🗑️ Sil";
       deleteButton.setAttribute("aria-label", `${item.isim} ürününü sepetten sil`);
       deleteButton.addEventListener("click", () => removeCartItem(item.id));
 
-      quantityControls.append(decreaseButton, quantity, increaseButton, deleteButton);
-      listItem.append(itemName, quantityControls, itemTotal);
+      const itemTotal = document.createElement("span");
+      itemTotal.className = "cart-item-total";
+      itemTotal.textContent = formatPrice(item.fiyat * item.miktar);
+
+      quantityControls.append(decreaseButton, quantity, increaseButton);
+      itemDetails.append(itemName, unitPrice);
+      listItem.append(itemImage, itemDetails, quantityControls, itemTotal, deleteButton);
       itemsList.append(listItem);
     });
 
-    cartContent.append(itemsList);
+    cartItems.append(itemsList);
   }
 
   const subtotal = sepet.reduce((sum, item) => sum + item.fiyat * item.miktar, 0);
   const discount = couponApplied ? subtotal * 0.1 : 0;
   const total = subtotal - discount;
-
-  const subtotalRow = document.createElement("p");
-  subtotalRow.className = "cart-total-row";
-  subtotalRow.textContent = `Ara Toplam: ${formatPrice(subtotal)}`;
-
-  const discountRow = document.createElement("p");
-  discountRow.className = "cart-total-row cart-discount";
-  discountRow.textContent = `İndirim Tutarı: -${formatPrice(discount)}`;
-
-  const totalRow = document.createElement("p");
-  totalRow.className = "cart-total";
-  totalRow.textContent = `Genel Toplam: ${formatPrice(total)}`;
-  cartContent.append(subtotalRow, discountRow, totalRow);
-
-  const clearCartButton = document.createElement("button");
-  clearCartButton.type = "button";
-  clearCartButton.id = "clear-cart-btn";
-  clearCartButton.className = "clear-cart-button";
-  clearCartButton.textContent = "Sepeti Temizle";
-  clearCartButton.disabled = sepet.length === 0;
-  clearCartButton.addEventListener("click", clearCart);
-  cartContent.append(clearCartButton);
+  subtotalValue.textContent = formatPrice(subtotal);
+  discountValue.textContent = `-${formatPrice(discount)}`;
+  totalValue.textContent = formatPrice(total);
 
   if (orderSuccessMessage) {
     const successMessage = document.createElement("p");
     successMessage.className = "order-success-message";
     successMessage.setAttribute("role", "status");
     successMessage.textContent = orderSuccessMessage;
-    cartContent.append(successMessage);
+    cartItems.append(successMessage);
   }
+}
+
+function renderCartPage() {
+  const productList = document.getElementById("product-list");
+
+  if (!productList) {
+    throw new Error("#product-list alanı bulunamadı.");
+  }
+
+  const previousCouponCode =
+    document.getElementById("cart-page-coupon-input")?.value || "";
+  const formatPrice = (price) => price.toLocaleString("tr-TR", {
+    style: "currency",
+    currency: "TRY"
+  });
+  const subtotal = sepet.reduce((sum, item) => sum + item.fiyat * item.miktar, 0);
+  const discount = couponApplied ? subtotal * 0.1 : 0;
+  const total = subtotal - discount;
+
+  productList.dataset.view = "cart";
+  productList.replaceChildren();
+
+  const cartPage = document.createElement("section");
+  cartPage.className = "cart-page";
+  cartPage.setAttribute("aria-labelledby", "cart-page-title");
+
+  const pageTitle = document.createElement("h1");
+  pageTitle.id = "cart-page-title";
+  pageTitle.textContent = "Sepetim";
+  cartPage.append(pageTitle);
+
+  if (sepet.length === 0) {
+    const emptyState = document.createElement("div");
+    emptyState.className = "cart-page-empty";
+
+    const emptyMessage = document.createElement("p");
+    emptyMessage.className = "cart-empty-message";
+    emptyMessage.textContent = "🛒 Sepetinizde ürün bulunmamaktadır";
+
+    const shoppingButton = document.createElement("button");
+    shoppingButton.type = "button";
+    shoppingButton.className = "cart-page-primary-button";
+    shoppingButton.textContent = "Alışverişe Başla";
+    shoppingButton.addEventListener("click", () => {
+      const categoryTabs = document.querySelectorAll("#category-tabs li");
+      const allProductsTab = Array.from(categoryTabs).find(
+        (tab) => tab.getAttribute("data-category") === "Tümü"
+      );
+      if (!allProductsTab) {
+        throw new Error("'Tümü' kategori sekmesi bulunamadı.");
+      }
+
+      categoryTabs.forEach((tab) => tab.classList.remove("active"));
+      allProductsTab.classList.add("active");
+
+      const searchInput = document.getElementById("search-input");
+      if (searchInput) {
+        searchInput.value = "";
+      }
+
+      globalThis.renderProducts("Tümü");
+    });
+
+    emptyState.append(emptyMessage, shoppingButton);
+    cartPage.append(emptyState);
+    productList.append(cartPage);
+    updateCartBadge();
+    return;
+  }
+
+  const cartLayout = document.createElement("div");
+  cartLayout.className = "cart-page-layout";
+
+  const itemList = document.createElement("div");
+  itemList.className = "cart-page-items";
+  itemList.setAttribute("aria-label", "Sepet ürünleri");
+
+  sepet.forEach((item) => {
+    const itemCard = document.createElement("article");
+    itemCard.className = "cart-page-item";
+
+    const image = document.createElement("img");
+    image.className = "cart-page-item-image";
+    image.src = item.image || item.resimURL || "";
+    image.alt = item.title || item.isim;
+    image.loading = "lazy";
+    image.onerror = function () {
+      this.onerror = null;
+      this.src = "https://via.placeholder.com/80?text=Urun";
+    };
+
+    const details = document.createElement("div");
+    details.className = "cart-page-item-details";
+
+    const name = document.createElement("h2");
+    name.className = "cart-page-item-name";
+    name.textContent = item.isim;
+
+    const unitPrice = document.createElement("p");
+    unitPrice.className = "cart-page-unit-price";
+    unitPrice.textContent = `Birim fiyat: ${formatPrice(item.fiyat)}`;
+
+    const quantityControls = document.createElement("div");
+    quantityControls.className = "cart-quantity cart-page-quantity";
+
+    const decreaseButton = document.createElement("button");
+    decreaseButton.type = "button";
+    decreaseButton.className = "qty-btn";
+    decreaseButton.textContent = "-";
+    decreaseButton.setAttribute("aria-label", `${item.isim} miktarını azalt`);
+    decreaseButton.addEventListener("click", () => decreaseCartItem(item.id));
+
+    const quantity = document.createElement("span");
+    quantity.textContent = String(item.miktar);
+    quantity.setAttribute("aria-label", "Miktar");
+
+    const increaseButton = document.createElement("button");
+    increaseButton.type = "button";
+    increaseButton.className = "qty-btn";
+    increaseButton.textContent = "+";
+    increaseButton.setAttribute("aria-label", `${item.isim} miktarını artır`);
+    increaseButton.addEventListener("click", () => addToCart(item));
+
+    quantityControls.append(decreaseButton, quantity, increaseButton);
+    details.append(name, unitPrice, quantityControls);
+
+    const itemTotal = document.createElement("p");
+    itemTotal.className = "cart-page-item-total";
+    itemTotal.textContent = formatPrice(item.fiyat * item.miktar);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "cart-delete-button";
+    deleteButton.textContent = "🗑️ Sil";
+    deleteButton.setAttribute("aria-label", `${item.isim} ürününü sepetten sil`);
+    deleteButton.addEventListener("click", () => removeCartItem(item.id));
+
+    itemCard.append(image, details, itemTotal, deleteButton);
+    itemList.append(itemCard);
+  });
+
+  const summary = document.createElement("aside");
+  summary.className = "cart-page-summary cart-summary";
+  summary.setAttribute("aria-labelledby", "cart-summary-title");
+
+  const summaryTitle = document.createElement("h2");
+  summaryTitle.id = "cart-summary-title";
+  summaryTitle.textContent = "Sipariş Özeti";
+
+  const subtotalRow = document.createElement("p");
+  subtotalRow.className = "cart-total-row";
+  subtotalRow.append("Ara Toplam ", createPriceValue(formatPrice(subtotal)));
+
+  const discountRow = document.createElement("p");
+  discountRow.className = "cart-total-row cart-discount";
+  discountRow.append("İndirim ", createPriceValue(`-${formatPrice(discount)}`));
+
+  const totalRow = document.createElement("p");
+  totalRow.className = "cart-total";
+  totalRow.append("Genel Toplam ", createPriceValue(formatPrice(total)));
+
+  const couponSection = document.createElement("div");
+  couponSection.className = "cart-page-coupon";
+
+  const couponInput = document.createElement("input");
+  couponInput.id = "cart-page-coupon-input";
+  couponInput.type = "text";
+  couponInput.placeholder = "Kupon Kodu";
+  couponInput.setAttribute("aria-label", "Kupon Kodu");
+  couponInput.value = previousCouponCode;
+
+  const applyCouponButton = document.createElement("button");
+  applyCouponButton.type = "button";
+  applyCouponButton.className = "cart-page-secondary-button";
+  applyCouponButton.textContent = "Uygula";
+  applyCouponButton.addEventListener("click", applyCoupon);
+  couponSection.append(couponInput, applyCouponButton);
+
+  const actions = document.createElement("div");
+  actions.className = "cart-page-actions";
+
+  const clearCartButton = document.createElement("button");
+  clearCartButton.type = "button";
+  clearCartButton.className = "cart-page-clear-button";
+  clearCartButton.textContent = "Sepeti Temizle";
+  clearCartButton.addEventListener("click", clearCart);
 
   const checkoutButton = document.createElement("button");
   checkoutButton.type = "button";
-  checkoutButton.id = "checkout-btn";
-  checkoutButton.className = "checkout-button";
+  checkoutButton.className = "cart-page-primary-button";
+  checkoutButton.disabled = sepet.length === 0;
   checkoutButton.textContent = "Siparişi Tamamla";
   checkoutButton.addEventListener("click", completeOrder);
-  cartContent.append(checkoutButton);
+
+  actions.append(clearCartButton, checkoutButton);
+  summary.append(summaryTitle, subtotalRow, discountRow, totalRow, couponSection, actions);
+  cartLayout.append(itemList, summary);
+  cartPage.append(cartLayout);
+  productList.append(cartPage);
+  updateCartBadge();
+}
+
+function createPriceValue(price) {
+  const value = document.createElement("span");
+  value.textContent = price;
+  return value;
+}
+
+function updateCartBadge() {
+  const cartBadge = document.getElementById("cart-badge");
+  if (!cartBadge) {
+    throw new Error("#cart-badge alanı bulunamadı.");
+  }
+
+  cartBadge.textContent = String(
+    sepet.reduce((quantity, item) => quantity + item.miktar, 0)
+  );
 }
 
 function saveCart() {
@@ -249,27 +470,39 @@ function removeCartItem(productId) {
 function clearCart() {
   sepet.length = 0;
   couponApplied = false;
+  const couponInput = getCouponInput();
+  if (couponInput) {
+    couponInput.value = "";
+  }
   localStorage.removeItem(CART_STORAGE_KEY);
   refreshProducts();
   renderCart();
 }
 
 function applyCoupon() {
-  const couponInput = document.getElementById("coupon-input");
+  const couponInput = getCouponInput();
 
   if (!couponInput) {
-    throw new Error("#coupon-input alanı bulunamadı.");
+    throw new Error("Kupon kodu alanı bulunamadı.");
   }
 
   const couponCode = couponInput.value.trim().toLocaleUpperCase("tr-TR");
   if (couponCode === "KAYA10" || couponCode === "YUZDE10") {
     couponApplied = true;
-    renderCart();
+    if (document.getElementById("product-list")?.dataset.view === "cart") {
+      renderCartPage();
+    } else {
+      renderCart();
+    }
     return;
   }
 
   couponApplied = false;
-  renderCart();
+  if (document.getElementById("product-list")?.dataset.view === "cart") {
+    renderCartPage();
+  } else {
+    renderCart();
+  }
   globalThis.showToast("Geçersiz kupon!");
 }
 
@@ -284,6 +517,10 @@ function completeOrder() {
     throw new Error("#checkout-modal penceresi bulunamadı.");
   }
 
+  const cartModal = document.getElementById("cart-modal");
+  if (cartModal) {
+    cartModal.hidden = true;
+  }
   checkoutModal.hidden = false;
 }
 
@@ -384,7 +621,7 @@ function submitCheckout(event) {
   orderSuccessMessage = "Siparişiniz başarıyla alındı! Teşekkür ederiz.";
   saveCart();
 
-  const couponInput = document.getElementById("coupon-input");
+  const couponInput = getCouponInput();
   if (couponInput) {
     couponInput.value = "";
   }
@@ -397,6 +634,11 @@ function submitCheckout(event) {
 }
 
 function initializeCheckout() {
+  const cartModal = document.getElementById("cart-modal");
+  const closeCartButton = document.getElementById("close-cart-modal");
+  const clearCartButton = document.getElementById("clear-cart-btn");
+  const checkoutButton = document.getElementById("checkout-btn");
+  const applyCouponButton = document.getElementById("apply-coupon-btn");
   const checkoutForm = document.getElementById("checkout-form");
   const checkoutModal = document.getElementById("checkout-modal");
   const closeCheckoutButton = document.getElementById("close-checkout-modal");
@@ -405,6 +647,11 @@ function initializeCheckout() {
   const printReceiptButton = document.getElementById("print-receipt-btn");
 
   if (
+    !cartModal ||
+    !closeCartButton ||
+    !clearCartButton ||
+    !checkoutButton ||
+    !applyCouponButton ||
     !checkoutForm ||
     !checkoutModal ||
     !closeCheckoutButton ||
@@ -415,6 +662,17 @@ function initializeCheckout() {
     throw new Error("Ödeme veya fatura penceresi alanlarından biri bulunamadı.");
   }
 
+  closeCartButton.addEventListener("click", () => {
+    cartModal.hidden = true;
+  });
+  cartModal.addEventListener("click", (event) => {
+    if (event.target === cartModal) {
+      cartModal.hidden = true;
+    }
+  });
+  clearCartButton.addEventListener("click", clearCart);
+  checkoutButton.addEventListener("click", completeOrder);
+  applyCouponButton.addEventListener("click", applyCoupon);
   checkoutForm.addEventListener("submit", submitCheckout);
   closeCheckoutButton.addEventListener("click", () => {
     checkoutModal.hidden = true;
@@ -442,6 +700,7 @@ globalThis.getRemainingStock = getRemainingStock;
 globalThis.getCartTotal = getCartTotal;
 globalThis.addToCart = addToCart;
 globalThis.renderCart = renderCart;
+globalThis.renderCartPage = renderCartPage;
 globalThis.loadCart = loadCart;
 globalThis.decreaseCartItem = decreaseCartItem;
 globalThis.removeCartItem = removeCartItem;

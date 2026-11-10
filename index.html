@@ -40,10 +40,11 @@
             <span class="action-icon">♡</span>
             <span class="action-text">Favorilerim</span>
           </button>
-          <a href="#cart" class="header-action-btn">
+          <button id="header-cart-btn" class="header-action-btn" type="button" aria-controls="product-list">
             <span class="action-icon">🛒</span>
             <span class="action-text">Sepetim</span>
-          </a>
+            <span id="cart-badge" class="cart-badge">0</span>
+          </button>
         </div>
       </div>
 
@@ -73,16 +74,7 @@
       <section aria-label="Ürünler">
         <div id="product-list"></div>
       </section>
-
-      <aside id="cart" aria-label="Sepet">
-        <h2>Sepet</h2>
-      </aside>
     </main>
-
-    <section id="coupon-section" aria-label="İndirim kuponu">
-      <input id="coupon-input" type="text" placeholder="Kupon Kodu" aria-label="Kupon Kodu">
-      <button id="apply-coupon-btn" type="button">Uygula</button>
-    </section>
 
     <!-- Ürün Detay & Yorum Modalı -->
     <div id="product-modal" class="product-modal" hidden>
@@ -179,6 +171,28 @@
         </div>
         <button id="print-receipt-btn" type="button" class="admin-submit-btn">🖨️ Faturayı Yazdır / PDF İndir</button>
       </div>
+    </div>
+
+    <!-- Sepet Modalı -->
+    <div id="cart-modal" class="product-modal" hidden>
+      <section class="product-modal-content cart-modal-content" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
+        <button id="close-cart-modal" type="button" class="close-modal" aria-label="Sepeti kapat">&times;</button>
+        <h2 id="cart-modal-title">Sepetim</h2>
+        <div id="cart-items-modal"></div>
+        <div class="cart-modal-totals">
+          <p class="cart-total-row">Ara Toplam <span id="cart-subtotal">0,00 ₺</span></p>
+          <p class="cart-total-row cart-discount">İndirim Tutarı <span id="cart-discount">-0,00 ₺</span></p>
+          <p class="cart-total">Genel Toplam <span id="cart-grand-total">0,00 ₺</span></p>
+        </div>
+        <section id="coupon-section" aria-label="İndirim kuponu">
+          <input id="coupon-input" type="text" placeholder="Kupon Kodu" aria-label="Kupon Kodu">
+          <button id="apply-coupon-btn" type="button">Uygula</button>
+        </section>
+        <div class="cart-modal-actions">
+          <button id="clear-cart-btn" class="clear-cart-button" type="button">Sepeti Temizle</button>
+          <button id="checkout-btn" class="checkout-button" type="button">Siparişi Tamamla</button>
+        </div>
+      </section>
     </div>
 
     <!-- Giriş Yap / Üye Ol Modalı -->

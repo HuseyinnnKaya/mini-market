@@ -20,6 +20,7 @@ function renderProducts(productsOrCategory = globalThis.products) {
     throw new Error("Ürünler dizisi yüklenemedi.");
   }
 
+  productList.dataset.view = "products";
   productList.replaceChildren();
 
   if (products.length === 0) {
@@ -72,12 +73,12 @@ function renderProducts(productsOrCategory = globalThis.products) {
       ? "⭐ Puan yok"
       : `⭐ ${averageRating.toFixed(1)} / 5`;
 
-    const remaining = globalThis.getRemainingStock(product);
+    const isOutOfStock = product.stok <= 0;
     const addToCartButton = document.createElement("button");
     addToCartButton.type = "button";
     addToCartButton.className = "add-to-cart-btn";
-    addToCartButton.textContent = remaining === 0 ? "Stok Tükendi" : "Sepete Ekle";
-    addToCartButton.disabled = remaining === 0;
+    addToCartButton.textContent = isOutOfStock ? "Stok Tükendi" : "Sepete Ekle";
+    addToCartButton.disabled = isOutOfStock;
     addToCartButton.addEventListener("click", () => globalThis.addToCart(product.id));
     card.append(
       image,
@@ -93,6 +94,7 @@ function renderProducts(productsOrCategory = globalThis.products) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("theme-toggle");
+  const headerCartButton = document.getElementById("header-cart-btn");
   const wishlistFilterButton = document.getElementById("wishlist-filter-btn");
   const searchInput = document.getElementById("search-input");
   const categorySelect = document.getElementById("category-select");
@@ -108,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (
     !wishlistFilterButton ||
+    !headerCartButton ||
     !searchInput ||
     !applyCouponButton ||
     !brandLogo ||
@@ -125,6 +128,10 @@ document.addEventListener("DOMContentLoaded", () => {
   globalThis.loadWishlist();
 
   wishlistFilterButton.addEventListener("click", globalThis.toggleWishlistFilter);
+  headerCartButton.addEventListener("click", () => {
+    categoryTabs.forEach((tab) => tab.classList.remove("active"));
+    globalThis.renderCartPage();
+  });
   brandLogo.addEventListener("click", (event) => {
     event.preventDefault();
     searchInput.value = "";
