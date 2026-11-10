@@ -13,11 +13,35 @@ function getCartTotal() {
   return subtotal - (couponApplied ? subtotal * 0.1 : 0);
 }
 
-function addToCart(product, showNotification = false) {
-  const productDetails = globalThis.products.find((item) => item.id === product.id);
+function refreshProducts() {
+  const filterControlIds = [
+    "search-input",
+    "category-select",
+    "sort-select",
+    "price-range",
+    "price-val",
+    "in-stock-checkbox"
+  ];
+
+  if (
+    typeof globalThis.filterProducts === "function" &&
+    filterControlIds.every((id) => document.getElementById(id))
+  ) {
+    globalThis.filterProducts();
+    return;
+  }
+
+  const selectedCategory = document
+    .querySelector("#category-tabs li.active")
+    ?.getAttribute("data-category") || "Tümü";
+  globalThis.renderProducts(selectedCategory);
+}
+
+function addToCart(productOrId, showNotification = typeof productOrId === "number") {
+  const productId = typeof productOrId === "number" ? productOrId : productOrId?.id;
+  const productDetails = globalThis.products.find((item) => item.id === productId);
 
   if (!productDetails || getRemainingStock(productDetails) === 0) {
-    globalThis.filterProducts();
     return;
   }
 
@@ -30,11 +54,11 @@ function addToCart(product, showNotification = false) {
   }
 
   saveCart();
-  globalThis.filterProducts();
+  refreshProducts();
   renderCart();
 
   if (showNotification) {
-    globalThis.showToast();
+    globalThis.showToast("Ürün sepete eklendi!");
   }
 }
 
@@ -53,10 +77,14 @@ function renderCart() {
   }
 
   cartContent.replaceChildren();
+  const formatPrice = (price) => price.toLocaleString("tr-TR", {
+    style: "currency",
+    currency: "TRY"
+  });
 
   if (sepet.length === 0) {
     const emptyMessage = document.createElement("p");
-    emptyMessage.textContent = "Sepetiniz henüz boş.";
+    emptyMessage.textContent = "🛒 Sepetinizde ürün bulunmamaktadır";
     cartContent.append(emptyMessage);
   } else {
     const itemsList = document.createElement("ul");
@@ -72,10 +100,7 @@ function renderCart() {
 
       const itemTotal = document.createElement("span");
       itemTotal.className = "cart-item-total";
-      itemTotal.textContent = (item.fiyat * item.miktar).toLocaleString("tr-TR", {
-        style: "currency",
-        currency: "TRY"
-      });
+      itemTotal.textContent = `Birim fiyat: ${formatPrice(item.fiyat)}`;
 
       const quantityControls = document.createElement("div");
       quantityControls.className = "cart-quantity";
@@ -114,10 +139,6 @@ function renderCart() {
   const subtotal = sepet.reduce((sum, item) => sum + item.fiyat * item.miktar, 0);
   const discount = couponApplied ? subtotal * 0.1 : 0;
   const total = subtotal - discount;
-  const formatPrice = (price) => price.toLocaleString("tr-TR", {
-    style: "currency",
-    currency: "TRY"
-  });
 
   const subtotalRow = document.createElement("p");
   subtotalRow.className = "cart-total-row";
@@ -134,6 +155,7 @@ function renderCart() {
 
   const clearCartButton = document.createElement("button");
   clearCartButton.type = "button";
+  clearCartButton.id = "clear-cart-btn";
   clearCartButton.className = "clear-cart-button";
   clearCartButton.textContent = "Sepeti Temizle";
   clearCartButton.disabled = sepet.length === 0;
@@ -150,6 +172,7 @@ function renderCart() {
 
   const checkoutButton = document.createElement("button");
   checkoutButton.type = "button";
+  checkoutButton.id = "checkout-btn";
   checkoutButton.className = "checkout-button";
   checkoutButton.textContent = "Siparişi Tamamla";
   checkoutButton.addEventListener("click", completeOrder);
@@ -206,7 +229,7 @@ function decreaseCartItem(productId) {
   }
 
   saveCart();
-  globalThis.filterProducts();
+  refreshProducts();
   renderCart();
 }
 
@@ -219,15 +242,15 @@ function removeCartItem(productId) {
 
   sepet.splice(itemIndex, 1);
   saveCart();
-  globalThis.filterProducts();
+  refreshProducts();
   renderCart();
 }
 
 function clearCart() {
   sepet.length = 0;
   couponApplied = false;
-  saveCart();
-  globalThis.filterProducts();
+  localStorage.removeItem(CART_STORAGE_KEY);
+  refreshProducts();
   renderCart();
 }
 
@@ -252,7 +275,7 @@ function applyCoupon() {
 
 function completeOrder() {
   if (sepet.length === 0) {
-    globalThis.showToast("Sipariş vermek için sepetinize ürün ekleyin.");
+    globalThis.showToast("Sepetiniz boş!");
     return;
   }
 
@@ -369,7 +392,7 @@ function submitCheckout(event) {
   checkoutModal.hidden = true;
   receiptModal.hidden = false;
   event.currentTarget.reset();
-  globalThis.filterProducts();
+  refreshProducts();
   renderCart();
 }
 

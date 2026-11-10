@@ -189,6 +189,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   reviewForm.addEventListener("submit", submitProductReview);
+
+  const loginToggleButton = document.getElementById("login-toggle-btn");
+  const loginModal = document.getElementById("login-modal");
+  const closeLoginModalButton = document.getElementById("close-login-modal");
+
+  if (!loginToggleButton || !loginModal || !closeLoginModalButton) {
+    throw new Error("Giriş penceresi alanlarından biri bulunamadı.");
+  }
+
+  loginToggleButton.addEventListener("click", () => {
+    loginModal.hidden = false;
+  });
+  closeLoginModalButton.addEventListener("click", () => {
+    loginModal.hidden = true;
+  });
+  loginModal.addEventListener("click", (event) => {
+    if (event.target === loginModal) {
+      loginModal.hidden = true;
+    }
+  });
 });
 
 globalThis.showToast = showToast;

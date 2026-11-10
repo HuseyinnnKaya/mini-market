@@ -33,6 +33,116 @@
   background: rgb(34 42 37 / 90%);
 }
 
+.login-modal-content {
+  width: min(100%, 440px);
+  padding: 2rem;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: #333;
+}
+
+.login-modal-content h2 {
+  margin: 0 2.5rem 1.5rem 0;
+  font-size: 1.35rem;
+  text-align: center;
+}
+
+.login-social-buttons {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.login-social-button {
+  min-height: 2.9rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.login-social-button:hover {
+  border-color: #bdbdbd;
+  background: #f8f8f8;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: #888;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.login-divider::before,
+.login-divider::after {
+  height: 1px;
+  flex: 1;
+  background: #e5e5e5;
+  content: "";
+}
+
+#login-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+#login-email {
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+}
+
+#login-email:focus-visible {
+  border-color: #1a73e8;
+  outline: 2px solid #1a73e8;
+  outline-offset: 1px;
+}
+
+.login-submit-button {
+  min-height: 2.9rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid #f27a1a;
+  border-radius: 8px;
+  background: #f27a1a;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.login-submit-button:hover {
+  border-color: #e66c0b;
+  background: #e66c0b;
+}
+
+.login-submit-button:focus-visible,
+.login-social-button:focus-visible {
+  outline: 3px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+.login-support-note {
+  margin: 1.25rem 0 0;
+  color: #777;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 .product-modal-content img {
   display: block;
   width: 100%;

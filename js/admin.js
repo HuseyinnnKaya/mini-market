@@ -1,4 +1,5 @@
 const ADMIN_PRODUCTS_STORAGE_KEY = "mini-market-admin-products";
+const PRODUCTS_STATE_STORAGE_KEY = "mini-market-products";
 const ADMIN_CATEGORIES = [
   "İçecekler",
   "Tatlılar",
@@ -27,6 +28,27 @@ function isValidAdminProduct(product) {
 }
 
 function loadAdminProducts() {
+  const savedCatalog = localStorage.getItem(PRODUCTS_STATE_STORAGE_KEY);
+  if (savedCatalog !== null) {
+    let parsedCatalog;
+    try {
+      parsedCatalog = JSON.parse(savedCatalog);
+    } catch (error) {
+      throw new Error("Kaydedilmiş ürün kataloğu geçerli JSON değil.", { cause: error });
+    }
+
+    if (
+      !Array.isArray(parsedCatalog) ||
+      parsedCatalog.some((product) => !isValidAdminProduct(product)) ||
+      new Set(parsedCatalog.map((product) => product.id)).size !== parsedCatalog.length
+    ) {
+      throw new Error("Kaydedilmiş ürün kataloğu beklenen biçimde değil.");
+    }
+
+    globalThis.products.splice(0, globalThis.products.length, ...parsedCatalog);
+    return;
+  }
+
   const savedProducts = localStorage.getItem(ADMIN_PRODUCTS_STORAGE_KEY);
   if (savedProducts === null) {
     return;
@@ -67,6 +89,65 @@ function closeAdminModal(modal) {
   modal.hidden = true;
 }
 
+function saveProducts() {
+  localStorage.setItem(PRODUCTS_STATE_STORAGE_KEY, JSON.stringify(globalThis.products));
+}
+
+function openEditModal(productId) {
+  const product = globalThis.products.find((item) => item.id === productId);
+  const modal = document.getElementById("admin-modal");
+  const form = document.getElementById("add-product-form");
+  const productIdInput = document.getElementById("admin-product-id");
+  const titleInput = document.getElementById("admin-title");
+  const priceInput = document.getElementById("admin-price");
+  const categorySelect = document.getElementById("admin-category");
+  const stockInput = document.getElementById("admin-stock");
+  const descriptionInput = document.getElementById("admin-description");
+  const modalTitle = modal?.querySelector("h2");
+  const submitButton = form?.querySelector('button[type="submit"]');
+
+  if (!product) {
+    throw new Error(`Düzenlenecek ürün bulunamadı: ${productId}`);
+  }
+
+  if (
+    !modal ||
+    !form ||
+    !productIdInput ||
+    !titleInput ||
+    !priceInput ||
+    !categorySelect ||
+    !stockInput ||
+    !descriptionInput ||
+    !modalTitle ||
+    !submitButton
+  ) {
+    throw new Error("Ürün düzenleme formu alanlarından biri bulunamadı.");
+  }
+
+  productIdInput.value = String(product.id);
+  titleInput.value = product.isim;
+  priceInput.value = String(product.fiyat);
+  categorySelect.value = product.kategori;
+  stockInput.value = String(product.stok);
+  descriptionInput.value = product.aciklama;
+  modalTitle.textContent = "✏️ Ürün Düzenle";
+  submitButton.textContent = "Değişiklikleri Kaydet";
+  openAdminModal(modal);
+}
+
+function deleteProduct(productId) {
+  const productIndex = globalThis.products.findIndex((product) => product.id === productId);
+  if (productIndex === -1) {
+    throw new Error(`Silinecek ürün bulunamadı: ${productId}`);
+  }
+
+  globalThis.products.splice(productIndex, 1);
+  saveProducts();
+  globalThis.showToast("Ürün silindi!");
+  globalThis.filterProducts();
+}
+
 function addAdminProduct(event) {
   event.preventDefault();
 
@@ -76,8 +157,22 @@ function addAdminProduct(event) {
   const categorySelect = document.getElementById("admin-category");
   const stockInput = document.getElementById("admin-stock");
   const descriptionInput = document.getElementById("admin-description");
+  const productIdInput = document.getElementById("admin-product-id");
+  const modal = document.getElementById("admin-modal");
+  const modalTitle = modal?.querySelector("h2");
+  const submitButton = form.querySelector('button[type="submit"]');
 
-  if (!titleInput || !priceInput || !categorySelect || !stockInput || !descriptionInput) {
+  if (
+    !titleInput ||
+    !priceInput ||
+    !categorySelect ||
+    !stockInput ||
+    !descriptionInput ||
+    !productIdInput ||
+    !modal ||
+    !modalTitle ||
+    !submitButton
+  ) {
     throw new Error("Admin ürün formu alanlarından biri bulunamadı.");
   }
 
@@ -103,47 +198,44 @@ function addAdminProduct(event) {
     return;
   }
 
+  const productId = productIdInput.value === "" ? null : Number(productIdInput.value);
+  const existingProduct = productId === null
+    ? null
+    : globalThis.products.find((product) => product.id === productId);
+
+  if (productId !== null && !existingProduct) {
+    throw new Error(`Güncellenecek ürün bulunamadı: ${productId}`);
+  }
+
   const categoryImage = globalThis.products.find((product) => product.kategori === category);
-  const nextId = globalThis.products.reduce(
-    (maxId, product) => Math.max(maxId, product.id),
-    0
-  ) + 1;
-  const newProduct = {
-    id: nextId,
+  const updatedProduct = {
+    id: productId ?? globalThis.products.reduce(
+      (maxId, product) => Math.max(maxId, product.id),
+      0
+    ) + 1,
     isim: name,
     fiyat: price,
     kategori: category,
     stok: stock,
     aciklama: descriptionInput.value.trim(),
-    resimURL: categoryImage?.resimURL || ""
+    image: categoryImage?.image || categoryImage?.resimURL || "",
+    resimURL: categoryImage?.resimURL || categoryImage?.image || ""
   };
-  const savedProducts = localStorage.getItem(ADMIN_PRODUCTS_STORAGE_KEY);
-  let persistedProducts = [];
 
-  if (savedProducts !== null) {
-    try {
-      persistedProducts = JSON.parse(savedProducts);
-    } catch (error) {
-      throw new Error("Kaydedilmiş admin ürünleri geçerli JSON değil.", { cause: error });
-    }
-
-    if (
-      !Array.isArray(persistedProducts) ||
-      persistedProducts.some((product) => !isValidAdminProduct(product))
-    ) {
-      throw new Error("Kaydedilmiş admin ürünleri beklenen biçimde değil.");
-    }
+  if (existingProduct) {
+    Object.assign(existingProduct, updatedProduct);
+  } else {
+    globalThis.products.push(updatedProduct);
   }
 
-  localStorage.setItem(
-    ADMIN_PRODUCTS_STORAGE_KEY,
-    JSON.stringify([...persistedProducts, newProduct])
-  );
-  globalThis.products.push(newProduct);
-  globalThis.renderProducts(globalThis.products);
-  globalThis.showToast("Yeni ürün eklendi!");
+  saveProducts();
   form.reset();
-  closeAdminModal(document.getElementById("admin-modal"));
+  productIdInput.value = "";
+  modalTitle.textContent = "⚙️ Admin Ürün Yönetim Paneli";
+  submitButton.textContent = "Ürünü Kaydet";
+  closeAdminModal(modal);
+  globalThis.filterProducts();
+  globalThis.showToast(existingProduct ? "Ürün güncellendi!" : "Yeni ürün eklendi!");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -153,8 +245,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("add-product-form");
   const priceInput = document.getElementById("admin-price");
   const stockInput = document.getElementById("admin-stock");
+  const productIdInput = document.getElementById("admin-product-id");
+  const modalTitle = modal?.querySelector("h2");
+  const submitButton = form?.querySelector('button[type="submit"]');
 
-  if (!toggleButton || !modal || !closeButton || !form || !priceInput || !stockInput) {
+  if (
+    !modal ||
+    !closeButton ||
+    !form ||
+    !priceInput ||
+    !stockInput ||
+    !productIdInput ||
+    !modalTitle ||
+    !submitButton
+  ) {
     throw new Error("Admin paneli için gerekli sayfa alanları bulunamadı.");
   }
 
@@ -169,7 +273,15 @@ document.addEventListener("DOMContentLoaded", () => {
   stockInput.step = "1";
 
   loadAdminProducts();
-  toggleButton.addEventListener("click", () => openAdminModal(modal));
+  if (toggleButton) {
+    toggleButton.addEventListener("click", () => {
+      form.reset();
+      productIdInput.value = "";
+      modalTitle.textContent = "⚙️ Admin Ürün Yönetim Paneli";
+      submitButton.textContent = "Ürünü Kaydet";
+      openAdminModal(modal);
+    });
+  }
   closeButton.addEventListener("click", () => closeAdminModal(modal));
   modal.addEventListener("click", (event) => {
     if (event.target === modal) {
@@ -178,3 +290,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   form.addEventListener("submit", addAdminProduct);
 });
+
+globalThis.openEditModal = openEditModal;
+globalThis.deleteProduct = deleteProduct;

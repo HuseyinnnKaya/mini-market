@@ -1,14 +1,18 @@
-<!categoryDOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Market</title>
+
+    <!-- CSS Modülleri -->
     <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/cart.css">
-<link rel="stylesheet" href="css/modal.css">
-<link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/admin.css">
+
+    <!-- JS Modülleri -->
     <script src="js/products.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/ui.js"></script>
@@ -19,31 +23,50 @@
   </head>
   <body>
     <header>
-      <h1>Mini Market</h1>
-      <input id="search-input" type="search" placeholder="Ürün ara..." aria-label="Ürün ara">
-      <select id="category-select" aria-label="Kategori filtresi">
-        <option value="Tümü">Tümü</option>
-        <option value="Süt Ürünleri">Süt Ürünleri</option>
-        <option value="Unlu Mamuller">Unlu Mamuller</option>
-        <option value="Meyve &amp; Sebze">Meyve &amp; Sebze</option>
-        <option value="Bakliyat">Bakliyat</option>
-      </select>
-      <select id="sort-select" aria-label="Fiyata göre sırala">
-        <option value="default">Varsayılan</option>
-        <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
-        <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
-      </select>
-      <button id="wishlist-filter-btn" type="button" aria-pressed="false">Sadece Favoriler ❤️</button>
-      <div id="price-filter-container">
-  <label for="price-range">Maks. Fiyat: <span id="price-val">500</span> TL</label>
-  <input type="range" id="price-range" min="0" max="500" step="5" value="500">
-</div>
+      <header class="trendyol-header">
+      <!-- 1. Satır: Logo ve Sağ İkonlar -->
+      <div class="header-top">
+        <div class="header-left">
+          <button type="button" class="icon-menu-btn" aria-label="Menü">☰</button>
+          <a href="#" class="brand-logo">Mini Market</a>
+        </div>
 
-<label id="stock-filter-label">
-  <input type="checkbox" id="in-stock-checkbox"> Sadece Stokta Olanlar 📦
-</label>
-      <button id="theme-toggle" type="button" aria-label="Temayı değiştir">🌙</button>
-      <button id="admin-toggle-btn" type="button" aria-label="Admin Paneli">⚙️ Admin</button>
+        <div class="header-right">
+          <button id="login-toggle-btn" class="header-action-btn" type="button">
+            <span class="action-icon">👤</span>
+            <span class="action-text">Giriş Yap</span>
+          </button>
+          <button id="wishlist-filter-btn" class="header-action-btn" type="button" aria-pressed="false">
+            <span class="action-icon">♡</span>
+            <span class="action-text">Favorilerim</span>
+          </button>
+          <a href="#cart" class="header-action-btn">
+            <span class="action-icon">🛒</span>
+            <span class="action-text">Sepetim</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. Satır: Trendyol Tarzı Arama Çubuğu -->
+      <div class="header-search-bar">
+        <span class="search-icon">🔍</span>
+        <input id="search-input" type="search" placeholder="Ürün, kategori veya marka ara" aria-label="Ürün ara">
+      </div>
+
+      <!-- 3. Satır: Yatay Kategori Çubuğu -->
+      <nav class="category-nav">
+        <ul id="category-tabs">
+          <li class="active" data-category="Tümü">Tümü</li>
+          <li data-category="İçecekler">İçecekler</li>
+          <li data-category="Tatlılar">Tatlılar</li>
+          <li data-category="Meyve & Sebze">Meyve &amp; Sebze</li>
+          <li data-category="Süt Ürünleri">Süt Ürünleri</li>
+          <li data-category="Unlu Mamuller">Unlu Mamuller</li>
+          <li data-category="Bakliyat">Bakliyat</li>
+          <li data-category="Atıştırmalıklar">Atıştırmalıklar</li>
+        </ul>
+      </nav>
+    </header>
     </header>
 
     <main>
@@ -61,6 +84,7 @@
       <button id="apply-coupon-btn" type="button">Uygula</button>
     </section>
 
+    <!-- Ürün Detay & Yorum Modalı -->
     <div id="product-modal" class="product-modal" hidden>
       <section class="product-modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-product-title">
         <button class="close-modal" type="button" aria-label="Pencereyi kapat">&times;</button>
@@ -68,90 +92,111 @@
         <h2 id="modal-product-title"></h2>
         <p id="modal-product-description"></p>
         <p id="modal-product-price" class="modal-product-price"></p>
-        <hr>
-<div id="product-reviews-section">
-  <h3>⭐ Değerlendirmeler ve Yorumlar</h3>
-  <div id="modal-rating-summary">Ortalama Puan: <span id="avg-rating">0</span> / 5</div>
-  
-  <!-- Yorum Listesi -->
-  <div id="reviews-list"></div>
 
-  <!-- Yorum Ekleme Formu -->
-  <form id="add-review-form">
-    <h4>Yorum Yap</h4>
-    <select id="review-rating" required>
-      <option value="5">⭐⭐⭐⭐⭐ (5 Yıldız)</option>
-      <option value="4">⭐⭐⭐⭐ (4 Yıldız)</option>
-      <option value="3">⭐⭐⭐ (3 Yıldız)</option>
-      <option value="2">⭐⭐ (2 Yıldız)</option>
-      <option value="1">⭐ (1 Yıldız)</option>
-    </select>
-    <textarea id="review-comment" placeholder="Ürün hakkında görüşleriniz..." required></textarea>
-    <button type="submit" class="admin-submit-btn">Yorum Gönder</button>
-  </form>
-</div>
+        <hr>
+        <div id="product-reviews-section">
+          <h3>⭐ Değerlendirmeler ve Yorumlar</h3>
+          <div id="modal-rating-summary">Ortalama Puan: <span id="avg-rating">0</span> / 5</div>
+          <div id="reviews-list"></div>
+          <form id="add-review-form">
+            <h4>Yorum Yap</h4>
+            <select id="review-rating" required>
+              <option value="5">⭐⭐⭐⭐⭐ (5 Yıldız)</option>
+              <option value="4">⭐⭐⭐⭐ (4 Yıldız)</option>
+              <option value="3">⭐⭐⭐ (3 Yıldız)</option>
+              <option value="2">⭐⭐ (2 Yıldız)</option>
+              <option value="1">⭐ (1 Yıldız)</option>
+            </select>
+            <textarea id="review-comment" placeholder="Ürün hakkında görüşleriniz..." required></textarea>
+            <button type="submit" class="admin-submit-btn">Yorum Gönder</button>
+          </form>
+        </div>
       </section>
     </div>
-    <div id="admin-modal" class="admin-modal" hidden>
-  <div class="admin-modal-content">
-    <button id="close-admin-modal" type="button" class="close-modal">&times;</button>
-    <h2>⚙️ Admin Ürün Yönetim Paneli</h2>
-    <form id="add-product-form">
-      <input type="text" id="admin-title" placeholder="Ürün Adı" required>
-      <input type="number" id="admin-price" placeholder="Fiyat (TL)" step="0.01" required>
-      <select id="admin-category" required>
-        <option value="">Kategori Seçin</option>
-        <option value="İçecekler">İçecekler</option>
-        <option value="Tatlılar">Tatlılar</option>
-        <option value="Meyve & Sebze">Meyve & Sebze</option>
-        <option value="Süt Ürünleri">Süt Ürünleri</option>
-        <option value="Unlu Mamuller">Unlu Mamuller</option>
-        <option value="Bakliyat">Bakliyat</option>
-        <option value="Atıştırmalıklar">Atıştırmalıklar</option>
-      </select>
-      <input type="number" id="admin-stock" placeholder="Stok Miktarı" required>
-      <textarea id="admin-description" placeholder="Ürün Açıklaması"></textarea>
-      <button type="submit" class="admin-submit-btn">Ürünü Ekle</button>
-    </form>
-  </div>
-</div>
-<!-- Ödeme (Checkout) Modalı -->
-<div id="checkout-modal" class="product-modal" hidden>
-  <div class="product-modal-content">
-    <button id="close-checkout-modal" type="button" class="close-modal">&times;</button>
-    <h2>💳 Ödeme ve Teslimat Bilgileri</h2>
-    <form id="checkout-form">
-      <input type="text" id="customer-name" placeholder="Ad Soyad" required>
-      <input type="email" id="customer-email" placeholder="E-posta Adresi" required>
-      <textarea id="customer-address" placeholder="Teslimat Adresi" required></textarea>
-      <select id="payment-method" required>
-        <option value="Kapıda Ödeme">Kapıda Nakit / Kart</option>
-        <option value="Kredi Kartı">Kredi Kartı / Banka Kartı</option>
-      </select>
-      <button type="submit" class="admin-submit-btn">Siparişi Onayla</button>
-    </form>
-  </div>
-</div>
 
-<!-- Fatura / Makbuz Modalı -->
-<div id="receipt-modal" class="product-modal" hidden>
-  <div class="product-modal-content receipt-content">
-    <button id="close-receipt-modal" type="button" class="close-modal">&times;</button>
-    <div id="receipt-print-area">
-      <h2>🧾 Mini Market Sipariş Faturası</h2>
-      <p><strong>Sipariş No:</strong> <span id="receipt-id"></span></p>
-      <p><strong>Tarih:</strong> <span id="receipt-date"></span></p>
-      <hr>
-      <p><strong>Müşteri:</strong> <span id="receipt-customer"></span></p>
-      <p><strong>Adres:</strong> <span id="receipt-address"></span></p>
-      <hr>
-      <h3>Ürünler</h3>
-      <ul id="receipt-items-list"></ul>
-      <hr>
-      <p><strong>Genel Toplam:</strong> <span id="receipt-total"></span> TL</p>
+    <!-- Admin Paneli Modalı -->
+    <div id="admin-modal" class="admin-modal" hidden>
+      <div class="admin-modal-content">
+        <button id="close-admin-modal" type="button" class="close-modal">&times;</button>
+        <h2>⚙️ Admin Ürün Yönetim Paneli</h2>
+        <form id="add-product-form">
+          <!-- Düzenleme için Gizli ID Alanı -->
+          <input type="hidden" id="admin-product-id">
+          
+          <input type="text" id="admin-title" placeholder="Ürün Adı" required>
+          <input type="number" id="admin-price" placeholder="Fiyat (TL)" step="0.01" required>
+          <select id="admin-category" required>
+            <option value="">Kategori Seçin</option>
+            <option value="İçecekler">İçecekler</option>
+            <option value="Tatlılar">Tatlılar</option>
+            <option value="Meyve &amp; Sebze">Meyve &amp; Sebze</option>
+            <option value="Süt Ürünleri">Süt Ürünleri</option>
+            <option value="Unlu Mamuller">Unlu Mamuller</option>
+            <option value="Bakliyat">Bakliyat</option>
+            <option value="Atıştırmalıklar">Atıştırmalıklar</option>
+          </select>
+          <input type="number" id="admin-stock" placeholder="Stok Miktarı" required>
+          <textarea id="admin-description" placeholder="Ürün Açıklaması"></textarea>
+          <button type="submit" class="admin-submit-btn">Ürünü Kaydet</button>
+        </form>
+      </div>
     </div>
-    <button id="print-receipt-btn" type="button" class="admin-submit-btn">🖨️ Faturayı Yazdır / PDF İndir</button>
-  </div>
-</div>
+
+    <!-- Ödeme (Checkout) Modalı -->
+    <div id="checkout-modal" class="product-modal" hidden>
+      <div class="product-modal-content">
+        <button id="close-checkout-modal" type="button" class="close-modal">&times;</button>
+        <h2>💳 Ödeme ve Teslimat Bilgileri</h2>
+        <form id="checkout-form">
+          <input type="text" id="customer-name" placeholder="Ad Soyad" required>
+          <input type="email" id="customer-email" placeholder="E-posta Adresi" required>
+          <textarea id="customer-address" placeholder="Teslimat Adresi" required></textarea>
+          <select id="payment-method" required>
+            <option value="Kapıda Ödeme">Kapıda Nakit / Kart</option>
+            <option value="Kredi Kartı">Kredi Kartı / Banka Kartı</option>
+          </select>
+          <button type="submit" class="admin-submit-btn">Siparişi Onayla</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Fatura / Makbuz Modalı -->
+    <div id="receipt-modal" class="product-modal" hidden>
+      <div class="product-modal-content receipt-content">
+        <button id="close-receipt-modal" type="button" class="close-modal">&times;</button>
+        <div id="receipt-print-area">
+          <h2>🧾 Mini Market Sipariş Faturası</h2>
+          <p><strong>Sipariş No:</strong> <span id="receipt-id"></span></p>
+          <p><strong>Tarih:</strong> <span id="receipt-date"></span></p>
+          <hr>
+          <p><strong>Müşteri:</strong> <span id="receipt-customer"></span></p>
+          <p><strong>Adres:</strong> <span id="receipt-address"></span></p>
+          <hr>
+          <h3>Ürünler</h3>
+          <ul id="receipt-items-list"></ul>
+          <hr>
+          <p><strong>Genel Toplam:</strong> <span id="receipt-total"></span> TL</p>
+        </div>
+        <button id="print-receipt-btn" type="button" class="admin-submit-btn">🖨️ Faturayı Yazdır / PDF İndir</button>
+      </div>
+    </div>
+
+    <!-- Giriş Yap / Üye Ol Modalı -->
+    <div id="login-modal" class="product-modal login-modal" hidden>
+      <section class="product-modal-content login-modal-content" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+        <button id="close-login-modal" type="button" class="close-modal" aria-label="Pencereyi kapat">&times;</button>
+        <h2 id="login-modal-title">Giriş Yap veya Üye Ol</h2>
+        <div class="login-social-buttons">
+          <button type="button" class="login-social-button">Google ile devam et</button>
+          <button type="button" class="login-social-button">Facebook ile devam et</button>
+        </div>
+        <div class="login-divider"><span>—— Veya ——</span></div>
+        <form id="login-form">
+          <input id="login-email" type="email" placeholder="E-Posta" aria-label="E-Posta" autocomplete="email" required>
+          <button type="submit" class="login-submit-button">Devam Et</button>
+        </form>
+        <p class="login-support-note">Üye olmadan verilen siparişler ile ilgili olarak bu kanal üzerinden destek sağlanamamaktadır. İlgili siparişleriniz için 0212 331 02 00 numaralı hattımızdan bize dilediğiniz zaman ulaşabilirsiniz.</p>
+      </section>
+    </div>
   </body>
 </html>
